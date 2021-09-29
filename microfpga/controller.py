@@ -16,28 +16,32 @@ class MicroFPGA:
             
             self.version = self._serial.read(signals.ADDR_VER)
             self.id = self._serial.read(signals.ADDR_ID)
+            self.triggering_mode = self._serial.read(signals.ADDR_TRIGGER_MODE)
                 
             if (self.version == signals.CURR_VER) and (self.id == signals.ID_AU or self.id == signals.ID_CU):
                 # instantiates lasers
                 for i in range(n_lasers):
-                    self._lasers.append(signals.LaserTrigger(i, self._serial))
+                    self._lasers.append(signals.Laser_trigger(i, self._serial))
                     
                 # instantiates TTLs
                 for i in range(n_ttls):
                     self._ttls.append(signals.Ttl(i, self._serial))
                     
-                # instantiates lasers
+                # instantiates servos
                 for i in range(n_servos):
                     self._servos.append(signals.Servo(i, self._serial))
                     
-                # instantiates lasers
+                # instantiates pwms
                 for i in range(n_pwms):
                     self._pwms.append(signals.Pwm(i, self._serial))
                     
-                # instantiates lasers
+                # instantiates analog inputs
                 if self.id == signals.ID_AU:
                     for i in range(n_ais):
                         self._ais.append(signals.Analog(i, self._serial))
+
+                if self.triggering_mode:
+                    self._camera = signals.Camera(self._serial)
             else:
                 self.disconnect()
                 if self.version != signals.CURR_VER:
@@ -159,7 +163,51 @@ class MicroFPGA:
             return self._lasers[channel].get_state()
         else:
             return [-1,-1,-1]
-        
+
+    def set_camera_pulse(self, value):
+        if self.triggering_mode:
+            self._camera.set_pulse(value)
+
+    def get_camera_pulse(self):
+        if self.triggering_mode:
+            return self._camera.get_pulse()
+        else:
+            return -1
+
+    def set_camera_period(self, value):
+        if self.triggering_mode:
+            self._camera.set_period(value)
+
+    def get_camera_period(self):
+        if self.triggering_mode:
+            return self._camera.get_period()
+        else:
+            return -1
+
+    def set_camera_exposure(self, value):
+        if self.triggering_mode:
+            self._camera.set_exposure(value)
+
+    def get_camera_exposure(self):
+        if self.triggering_mode:
+            return self._camera.get_exposure()
+        else:
+            return -1
+
+    def start_camera(self):
+        if self.triggering_mode:
+            self._camera.start()
+
+    def stop_camera(self):
+        if self.triggering_mode:
+            self._camera.stop()
+
+    def is_camera_running(self):
+        if self.triggering_mode:
+            return self._camera.is_running()
+        else:
+            return False
+
     def get_id(self):
         if self.id == signals.ID_AU:
             return 'Au'
