@@ -1,59 +1,53 @@
-import microfpga.controller as ctrl
-import microfpga.signals as sgnl
+import microfpga.controller as cl
+import microfpga.signals as sig
 
-# creates a MicroFPGA controller
-num_lasers = 3;
-num_ttl = 2;
-num_servos = 3;
-num_pwm = 1;
-num_ai = 2; # will only work with Au FPGA
+# create a MicroFPGA controller, this will automatically disconnect at the end
+with cl.MicroFPGA(n_lasers=3, n_ttls=2, n_servos=3, n_pwms=1, n_ais=2) as mufpga:
+    # checks if successful
+    print('Connected to ' + mufpga.get_id())
 
-controller = ctrl.MicroFPGA(num_lasers, num_ttl, num_servos, num_pwm, num_ai)
+    # All signals can be accessed using the mufpga getters and setters.
+    # Channel indexing starts at 0: if num_ttl = 2, then there are TTL 0 and
+    # TTL 1.
 
-# checks if successful
-print('Connected to '+controller.get_id())
+    # get current Servo 1 state (if the FPGA was just recently powered up then default values are 0)
+    servo_id = 1
+    print('Current Servo ' + str(servo_id) + ' position: ' + str(mufpga.get_servo_state(servo_id)))
 
-# All signals can be accessed using the controller getters and setters.
-# Channel indexing starts at 0: if num_ttl = 2, then there are TTL 0 and
-# TTL 1. 
-               
-# gets current Servo 1 state (if the FPGA was just recently powered up then default values are 0)
-servo_id = 1
-print('Current Servo '+str(servo_id)+' position: '+str(controller.get_servo_state(servo_id)));
-                
-# moves Servo 1 to position 35412
-servo_pos = 35412
-b = controller.set_servo_state(servo_id, servo_pos);
-if not b:
-    print('Failed to write position to Servo 1')
-                
-# gets current Servo 1 state
-print('Current Servo '+str(servo_id)+' position: '+str(controller.get_servo_state(servo_id)));
-                
-# For lasers, the parameters can be changed individually...
-laser_id = 2
-new_mode = sgnl.LaserTrigger.MODE_RISING;
-new_duration = 2000; # us
-new_sequence = sgnl.format_sequence('1010101010101010'); # binary string of length 16
+    # move Servo 1 to position 35412
+    servo_pos = 35412
+    b = mufpga.set_servo_state(servo_id, servo_pos)
+    if not b:
+        print('Failed to write position to Servo 1')
 
-controller.set_mode_state(laser_id, new_mode);  
-print('Current Laser '+str(laser_id)+' mode state: '+str(controller.get_mode_state(laser_id)));
+    # get current Servo 1 state
+    print('Current Servo ' + str(servo_id) + ' position: ' + str(mufpga.get_servo_state(servo_id)))
 
-controller.set_duration_state(laser_id, new_duration);  
-print('Current Laser '+str(laser_id)+' duration state: '+str(controller.get_duration_state(laser_id)));
+    # For lasers, the parameters can be changed individually...
+    laser_id = 2
+    new_mode = sig.LaserTrigger.MODE_RISING
+    new_duration = 2000  # us
+    new_sequence = sig.format_sequence('1010101010101010')  # binary string of length 16
 
-controller.set_sequence_state(laser_id, new_sequence);   
-print('Current Laser '+str(laser_id)+' sequence state: '+str(controller.get_sequence_state(laser_id)));             
-                
-# ... or in bulk
-new_mode = sgnl.LaserTrigger.MODE_CAMERA;
-new_duration = 30; # us
-new_sequence = sgnl.format_sequence('1100110011001100'); # binary string of length 16
+    mufpga.set_mode(laser_id, new_mode)
+    print(f'Current Laser {laser_id} mode: {mufpga.get_mode(laser_id)}')
 
-controller.set_laser_state(laser_id, new_mode, new_duration, new_sequence);  
-vals = controller.get_laser_state(laser_id)  
-print('Current Laser '+str(laser_id)+' state: '+str(vals[0])+', '+str(vals[1])+', '+str(vals[2]));
-                                
-# disconnect
-controller.disconnect()
-print('Disconnected')
+    mufpga.set_duration(laser_id, new_duration)
+    print(f'Current Laser {laser_id} duration: {mufpga.get_duration(laser_id)}')
+
+    mufpga.set_sequence(laser_id, new_sequence)
+    print(f'Current Laser {laser_id} sequence: {mufpga.get_sequence(laser_id)}')
+
+    # ... or in bulk
+    laser = {
+        'channel': laser_id,
+        'mode': sig.LaserTrigger.MODE_CAMERA,
+        'duration': 1,
+        'sequence': sig.MAX_SEQUENCE
+    }
+    mufpga.set_laser_state(**laser)
+    print(mufpga.get_laser_state(laser_id))
+
+    # read analog input
+    analog_id = 0
+    print(f'Analog channel {analog_id} value: {mufpga.get_analog_state(analog_id)}')
