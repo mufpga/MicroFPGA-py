@@ -10,7 +10,7 @@ with ctrl.MicroFPGA(n_laser=3) as mufpga:
     if mufpga.is_connected():
 
         # if we are in camera trigger mode
-        if mufpga.can_trigger_camera():
+        if mufpga.is_active_trigger():
             # then we need to set the camera states
             camera = {
                 'pulse': 10,  # 10x100 us = 1 ms
@@ -47,7 +47,7 @@ with ctrl.MicroFPGA(n_laser=3) as mufpga:
         mufpga.set_laser_state(**laser2)
 
         # if we are in camera trigger mode
-        if mufpga.can_trigger_camera():
+        if mufpga.is_active_trigger():
             # we also need to start the camera
             mufpga.start_camera()
             print('Camera running:', mufpga.is_camera_running())

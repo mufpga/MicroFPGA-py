@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from microfpga import regint
 
 NUM_LASERS = 8
-NUM_TTL = 5
+NUM_TTL = 4
 NUM_PWM = 5
 NUM_SERVOS = 7
 NUM_AI = 8
@@ -14,7 +14,8 @@ ADDR_TTL = ADDR_SEQ + NUM_LASERS
 ADDR_SERVO = ADDR_TTL + NUM_TTL
 ADDR_PWM = ADDR_SERVO + NUM_SERVOS
 
-ADDR_START_TRIGGER = ADDR_PWM + NUM_PWM
+ADDR_ACTIVE_TRIGGER = ADDR_PWM + NUM_PWM
+ADDR_START_TRIGGER = ADDR_ACTIVE_TRIGGER + 1
 ADDR_CAM_PULSE = ADDR_START_TRIGGER + 1
 ADDR_CAM_PERIOD = ADDR_CAM_PULSE + 1
 ADDR_CAM_EXPO = ADDR_CAM_PERIOD + 1
@@ -23,7 +24,6 @@ ADDR_AI = ADDR_CAM_EXPO + 1
 
 ADDR_VER = 200
 ADDR_ID = 201
-ADDR_TRIGGER_MODE = 202
 
 CURR_VER = 3
 
@@ -341,6 +341,29 @@ class _CameraStart(Signal):
     def stop(self):
         return self.set_state(0)
 
+class TriggerMode(Signal):
+
+    def __init__(self, serial_com: regint.RegisterInterface):
+        Signal.__init__(self, 0, serial_com)
+
+    def get_address(self):
+        return ADDR_ACTIVE_TRIGGER
+
+    def is_allowed(self, value):
+        return value == 0 or value == 1
+
+    def get_num_signal(self):
+        return 1
+
+    def get_name(self):
+        return 'Active/passive camera trigger'
+
+    def start(self):
+        return self.set_state(1)
+
+    def stop(self):
+        return self.set_state(0)
+
 
 class Camera:
 
@@ -372,6 +395,11 @@ class Camera:
         self.set_pulse(pulse)
         self.set_period(period)
         self.set_exposure(exposure)
+
+    def get_state(self):
+        return {'pulse': self.get_pulse(),
+                'period': self.get_period(),
+                'exposure': self.get_exposure()}
 
     def start(self):
         return self._start.start()

@@ -3,7 +3,7 @@ from microfpga import regint
 
 
 class MicroFPGA:
-    def __init__(self, n_laser=0, n_ttl=0, n_servo=0, n_pwm=0, n_ai=0):
+    def __init__(self, n_laser=0, n_ttl=0, n_servo=0, n_pwm=0, n_ai=0, use_camera=True, active_trigger=True):
         self._serial = regint.RegisterInterface()
         self.device = self._serial.get_device()
 
@@ -16,32 +16,35 @@ class MicroFPGA:
 
             self._version = self._serial.read(signals.ADDR_VER)
             self._id = self._serial.read(signals.ADDR_ID)
-            self._triggering_mode = self._serial.read(signals.ADDR_TRIGGER_MODE)
 
             if (self._version == signals.CURR_VER) and (self._id == signals.ID_AU or self._id == signals.ID_CU):
-                # instantiates lasers
+                # instantiate lasers
                 for i in range(n_laser):
                     self._lasers.append(signals.LaserTrigger(i, self._serial))
 
-                # instantiates TTLs
+                # instantiate TTLs
                 for i in range(n_ttl):
                     self._ttls.append(signals.Ttl(i, self._serial))
 
-                # instantiates servos
+                # instantiate servos
                 for i in range(n_servo):
                     self._servos.append(signals.Servo(i, self._serial))
 
-                # instantiates pwms
+                # instantiate pwms
                 for i in range(n_pwm):
                     self._pwms.append(signals.Pwm(i, self._serial))
 
-                # instantiates analog inputs
+                # instantiate analog inputs
                 if self._id == signals.ID_AU:
                     for i in range(n_ai):
                         self._ais.append(signals.Analog(i, self._serial))
 
-                if self._triggering_mode:
+                # instantiate camera
+                if use_camera:
                     self._camera = signals.Camera(self._serial)
+                    self._trigger_mode = signals.TriggerMode(self._serial)
+                    self._trigger_mode.set_state(active_trigger)
+
             else:
                 self.disconnect()
                 if self._version != signals.CURR_VER:
@@ -171,56 +174,65 @@ class MicroFPGA:
         else:
             return [-1, -1, -1]
 
+    def set_trigger_mode(self, trigger_mode):
+        return self._trigger_mode.set_state(trigger_mode)
+
+    def get_trigger_mode(self):
+        return self._trigger_mode.get_state()
+
+    def is_active_trigger(self):
+        return self._trigger_mode.get_state()
+
     def set_camera_pulse(self, value):
-        if self._triggering_mode:
+        if self.get_trigger_mode():
             self._camera.set_pulse(value)
 
     def get_camera_pulse(self):
-        if self._triggering_mode:
+        if self.get_trigger_mode():
             return self._camera.get_pulse()
         else:
             return -1
 
     def set_camera_period(self, value):
-        if self._triggering_mode:
+        if self.get_trigger_mode():
             self._camera.set_period(value)
 
     def get_camera_period(self):
-        if self._triggering_mode:
+        if self.get_trigger_mode():
             return self._camera.get_period()
         else:
             return -1
 
     def set_camera_exposure(self, value):
-        if self._triggering_mode:
+        if self.get_trigger_mode():
             self._camera.set_exposure(value)
 
     def get_camera_exposure(self):
-        if self._triggering_mode:
+        if self.get_trigger_mode():
             return self._camera.get_exposure()
         else:
             return -1
 
     def set_camera_state(self, pulse, period, exposure):
-        if self._triggering_mode:
+        if self.get_trigger_mode():
             self._camera.set_state(pulse, period, exposure)
 
+    def get_camera_state(self):
+        return self._camera.get_state()
+
     def start_camera(self):
-        if self._triggering_mode:
+        if self.get_trigger_mode():
             self._camera.start()
 
     def stop_camera(self):
-        if self._triggering_mode:
+        if self.get_trigger_mode():
             self._camera.stop()
 
     def is_camera_running(self):
-        if self._triggering_mode:
+        if self.get_trigger_mode():
             return self._camera.is_running()
         else:
             return False
-
-    def can_trigger_camera(self):
-        return self._triggering_mode
 
     def get_id(self):
         if self._id == signals.ID_AU:

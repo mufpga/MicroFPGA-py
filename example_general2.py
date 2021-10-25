@@ -9,8 +9,8 @@ with ctrl.MicroFPGA(n_laser=1, n_servo=3, n_ai=2) as mufpga:
     if mufpga.is_connected():
         print('Connected to', mufpga.get_id())
 
-        # check if the fpga is in main trigger mode
-        print('Main trigger:', bool(mufpga.can_trigger_camera()))
+        # check if the fpga is in active trigger mode
+        print('Main trigger:', bool(mufpga.is_active_trigger()))
 
         # read analog channel 1
         print('Analog channel 1:', mufpga.get_analog_state(1))
