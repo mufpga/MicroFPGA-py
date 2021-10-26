@@ -4,7 +4,7 @@ import microfpga.signals as sig
 # create a MicroFPGA controller, this will automatically disconnect at the end
 with cl.MicroFPGA(n_lasers=3, n_ttls=2, n_servos=3, n_pwms=1, n_ais=2) as mufpga:
     # checks if successful
-    print('Connected to ' + mufpga.get_id())
+    print(f'Connected to {mufpga.get_id()}')
 
     # All signals can be accessed using the mufpga getters and setters.
     # Channel indexing starts at 0: if num_ttl = 2, then there are TTL 0 and
@@ -12,7 +12,7 @@ with cl.MicroFPGA(n_lasers=3, n_ttls=2, n_servos=3, n_pwms=1, n_ais=2) as mufpga
 
     # get current Servo 1 state (if the FPGA was just recently powered up then default values are 0)
     servo_id = 1
-    print('Current Servo ' + str(servo_id) + ' position: ' + str(mufpga.get_servo_state(servo_id)))
+    print(f'Current Servo {servo_id} position: {mufpga.get_servo_state(servo_id)}')
 
     # move Servo 1 to position 35412
     servo_pos = 35412
@@ -21,7 +21,7 @@ with cl.MicroFPGA(n_lasers=3, n_ttls=2, n_servos=3, n_pwms=1, n_ais=2) as mufpga
         print('Failed to write position to Servo 1')
 
     # get current Servo 1 state
-    print('Current Servo ' + str(servo_id) + ' position: ' + str(mufpga.get_servo_state(servo_id)))
+    print(f'Current Servo {servo_id} position: {mufpga.get_servo_state(servo_id)}')
 
     # For lasers, the parameters can be changed individually...
     laser_id = 2
