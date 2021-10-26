@@ -1,5 +1,6 @@
 import microfpga.controller as cl
 import microfpga.signals as sig
+import random as rd
 
 # create a MicroFPGA controller, this will automatically disconnect at the end
 with cl.MicroFPGA(n_lasers=3, n_ttls=2, n_servos=3, n_pwms=1, n_ais=2) as mufpga:
@@ -12,10 +13,11 @@ with cl.MicroFPGA(n_lasers=3, n_ttls=2, n_servos=3, n_pwms=1, n_ais=2) as mufpga
 
     # get current Servo 1 state (if the FPGA was just recently powered up then default values are 0)
     servo_id = 1
-    print(f'Current Servo {servo_id} position: {mufpga.get_servo_state(servo_id)}')
+    curr_servo_pos = mufpga.get_servo_state(servo_id)
+    print(f'Current Servo {servo_id} position: {curr_servo_pos}')
 
-    # move Servo 1 to position 35412
-    servo_pos = 35412
+    # move Servo 1 to another position
+    servo_pos = rd.randint(1000, 65500)
     b = mufpga.set_servo_state(servo_id, servo_pos)
     if not b:
         print('Failed to write position to Servo 1')
