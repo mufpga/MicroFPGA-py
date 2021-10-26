@@ -46,7 +46,7 @@ with cl.MicroFPGA(n_lasers=3, n_ttls=2, n_servos=3, n_pwms=1, n_ais=2) as mufpga
         'sequence': sig.MAX_SEQUENCE
     }
     mufpga.set_laser_state(**laser)
-    print(mufpga.get_laser_state(laser_id))
+    print(f'Current Laser {laser_id} state: {mufpga.get_laser_state(laser_id)}')
 
     # read analog input
     analog_id = 0

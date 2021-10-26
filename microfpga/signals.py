@@ -28,6 +28,10 @@ MAX_SEQ = 65535
 MAX_TTL = 1
 MAX_SERVO = 65535
 MAX_PWM = 255
+MAX_MODE = 4
+MAX_DURATION = 65535
+MAX_SEQUENCE = 65535
+
 
 def format_sequence(string):
     b = True

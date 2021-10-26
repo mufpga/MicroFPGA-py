@@ -61,7 +61,7 @@ class MicroFPGA:
         self._serial.disconnect()
 
     def is_connected(self):
-        return self.__serial.is_connected()
+        return self._serial.is_connected()
 
     def get_number_lasers(self):
         return len(self._lasers)
