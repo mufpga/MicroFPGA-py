@@ -4,7 +4,7 @@ from microfpga import regint
 
 class MicroFPGA:
 
-    def __init__(self, n_lasers, n_ttls, n_servos, n_pwms, n_ais):
+    def __init__(self, n_laser=0, n_ttl=0, n_servo=0, n_pwm=0, n_ai=0):
         self._serial = regint.RegisterInterface()
         self.device = self._serial.get_device()
 
@@ -20,33 +20,33 @@ class MicroFPGA:
 
             if (self.version == signals.CURR_VER) and (self.id == signals.ID_AU or self.id == signals.ID_CU):
                 # instantiates lasers
-                for i in range(n_lasers):
+                for i in range(n_laser):
                     self._lasers.append(signals.LaserTrigger(i, self._serial))
 
                 # instantiates TTLs
-                for i in range(n_ttls):
+                for i in range(n_ttl):
                     self._ttls.append(signals.Ttl(i, self._serial))
 
                 # instantiates lasers
-                for i in range(n_servos):
+                for i in range(n_servo):
                     self._servos.append(signals.Servo(i, self._serial))
 
                 # instantiates lasers
-                for i in range(n_pwms):
+                for i in range(n_pwm):
                     self._pwms.append(signals.Pwm(i, self._serial))
 
                 # instantiates lasers
                 if self.id == signals.ID_AU:
-                    for i in range(n_ais):
+                    for i in range(n_ai):
                         self._ais.append(signals.Analog(i, self._serial))
             else:
                 self.disconnect()
                 if self.version != signals.CURR_VER:
-                    raise Warning('Wrong version: expected ' + str(signals.CURR_VER) + \
+                    raise Warning('Wrong version: expected ' + str(signals.CURR_VER) +
                                   ', got ' + str(self.version) + '. The port has been disconnected')
 
                 if self.id != signals.ID_AU and self.id != signals.ID_CU:
-                    raise Warning('Wrong board id: expected ' + str(signals.ID_AU) + \
+                    raise Warning('Wrong board id: expected ' + str(signals.ID_AU) +
                                   ' (Au) or ' + str(signals.ID_CU) + ' (Cu), got ' + str(
                         self.id) + '. The port has been disconnected')
 
@@ -79,91 +79,91 @@ class MicroFPGA:
         return len(self._ais)
 
     def set_ttl_state(self, channel, value):
-        if channel >= 0 and channel < self.get_number_ttls():
+        if 0 <= channel < self.get_number_ttls():
             return self._ttls[channel].set_state(value)
         else:
             return False
 
     def get_ttl_state(self, channel):
-        if channel >= 0 and channel < self.get_number_ttls():
+        if 0 <= channel < self.get_number_ttls():
             return self._ttls[channel].get_state()
         else:
             return -1
 
     def set_servo_state(self, channel, value):
-        if channel >= 0 and channel < self.get_number_servos():
+        if 0 <= channel < self.get_number_servos():
             return self._servos[channel].set_state(value)
         else:
             return False
 
     def get_servo_state(self, channel):
-        if channel >= 0 and channel < self.get_number_servos():
+        if 0 <= channel < self.get_number_servos():
             return self._servos[channel].get_state()
         else:
             return -1
 
     def set_pwm_state(self, channel, value):
-        if channel >= 0 and channel < self.get_number_pwms():
+        if 0 <= channel < self.get_number_pwms():
             return self._pwms[channel].set_state(value)
         else:
             return False
 
     def get_pwm_state(self, channel):
-        if channel >= 0 and channel < self.get_number_pwms():
+        if 0 <= channel < self.get_number_pwms():
             return self._pwms[channel].get_state()
         else:
             return -1
 
     def get_analog_state(self, channel):
-        if channel >= 0 and channel < self.get_number_analogs():
+        if 0 <= channel < self.get_number_analogs():
             return self._ais[channel].get_state()
         else:
             return -1
 
     def set_mode(self, channel, value):
-        if channel >= 0 and channel < self.get_number_lasers():
+        if 0 <= channel < self.get_number_lasers():
             return self._lasers[channel].set_mode(value)
         else:
             return False
 
     def get_mode(self, channel):
-        if channel >= 0 and channel < self.get_number_lasers():
+        if 0 <= channel < self.get_number_lasers():
             return self._lasers[channel].get_mode()
         else:
             return -1
 
     def set_duration(self, channel, value):
-        if channel >= 0 and channel < self.get_number_lasers():
+        if 0 <= channel < self.get_number_lasers():
             return self._lasers[channel].set_duration(value)
         else:
             return False
 
     def get_duration(self, channel):
-        if channel >= 0 and channel < self.get_number_lasers():
+        if 0 <= channel < self.get_number_lasers():
             return self._lasers[channel].get_duration()
         else:
             return -1
 
     def set_sequence(self, channel, value):
-        if channel >= 0 and channel < self.get_number_lasers():
+        if 0 <= channel < self.get_number_lasers():
             return self._lasers[channel].set_sequence(value)
         else:
             return False
 
     def get_sequence(self, channel):
-        if channel >= 0 and channel < self.get_number_lasers():
+        if 0 <= channel < self.get_number_lasers():
             return self._lasers[channel].get_sequence()
         else:
             return -1
 
     def set_laser_state(self, channel, mode, duration, sequence):
-        if channel >= 0 and channel < self.get_number_lasers():
+        if 0 <= channel < self.get_number_lasers():
             return self._lasers[channel].set_state(mode, duration, sequence)
         else:
             return False
 
     def get_laser_state(self, channel):
-        if channel >= 0 and channel < self.get_number_lasers():
+        if 0 <= channel < self.get_number_lasers():
             return self._lasers[channel].get_state()
         else:
             return [-1, -1, -1]

@@ -3,7 +3,7 @@ import microfpga.signals as sig
 import random as rd
 
 # create a MicroFPGA controller, this will automatically disconnect at the end
-with cl.MicroFPGA(n_lasers=3, n_ttls=2, n_servos=3, n_pwms=1, n_ais=2) as mufpga:
+with cl.MicroFPGA(n_laser=3, n_ttl=2, n_servo=3, n_pwm=1, n_ai=2) as mufpga:
     # checks if successful
     print(f'Connected to {mufpga.get_id()}')
 
