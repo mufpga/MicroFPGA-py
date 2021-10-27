@@ -3,7 +3,7 @@ from microfpga import regint
 
 
 class MicroFPGA:
-    def __init__(self, n_laser=0, n_ttl=0, n_servo=0, n_pwm=0, n_ai=0, use_camera=True, active_trigger=True):
+    def __init__(self, n_laser=0, n_ttl=0, n_servo=0, n_pwm=0, n_ai=0, use_camera=True, default_trigger=True):
         self._serial = regint.RegisterInterface()
         self.device = self._serial.get_device()
 
@@ -43,7 +43,7 @@ class MicroFPGA:
                 if use_camera:
                     self._camera = signals.Camera(self._serial)
                     self._trigger_mode = signals.TriggerMode(self._serial)
-                    self._trigger_mode.set_state(active_trigger)
+                    self._trigger_mode.set_state(default_trigger)
 
             else:
                 self.disconnect()
@@ -174,7 +174,7 @@ class MicroFPGA:
         else:
             return [-1, -1, -1]
 
-    def set_trigger_mode(self, trigger_mode):
+    def set_camera_trigger_mode(self, trigger_mode):
         return self._trigger_mode.set_state(trigger_mode)
 
     def get_trigger_mode(self):

@@ -4,7 +4,7 @@ import microfpga.controller as ctrl
 import microfpga.signals as sig
 import time
 
-with ctrl.MicroFPGA(n_laser=3, use_camera=True, active_trigger=True) as mufpga:
+with ctrl.MicroFPGA(n_laser=3, use_camera=True, default_trigger=True) as mufpga:
 
     # check if connected
     if mufpga.is_connected():

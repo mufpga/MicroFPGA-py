@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from microfpga import regint
+from enum import Enum
 
 NUM_LASERS = 8
 NUM_TTL = 4
@@ -36,9 +37,24 @@ MAX_SEQUENCE = 65535
 MAX_TTL = 1
 MAX_SERVO = 65535
 MAX_PWM = 255
+MAX_AI = 65535
 MAX_CAM_PULSE = 65535
 MAX_CAM_PERIOD = 65535
 MAX_CAM_EXPOSURE = 65535
+MAX_START = 1
+
+
+class LaserTriggerMode(Enum):
+    MODE_OFF = 0
+    MODE_ON = 1
+    MODE_RISING = 2
+    MODE_FALLING = 3
+    MODE_CAMERA = 4
+
+
+class CameraTriggerMode(Enum):
+    ACTIVE = 1
+    PASSIVE = 0
 
 
 def format_sequence(string):
@@ -61,15 +77,18 @@ class Signal(ABC):
             self.output = output
             self._serial_com = serial_com
         else:
-            raise Exception('Index exceed maximum number of ' + self.get_name() + ' signals.')
+            raise Exception(f'{channel_id} exceeds maximum number of {self.get_name()} signals.')
 
     @abstractmethod
     def get_address(self):
         pass
 
     @abstractmethod
-    def is_allowed(self, value):
+    def get_max(self):
         pass
+
+    def is_allowed(self, value: int):
+        return 0 <= value <= self.get_max()
 
     @abstractmethod
     def get_num_signal(self):
@@ -79,12 +98,12 @@ class Signal(ABC):
     def get_name(self):
         pass
 
-    def set_state(self, value):
+    def set_state(self, value: int):
         if self.output and self.is_allowed(value):
             self._serial_com.write(self.get_address() + self.channel_id, value)
             return True
         else:
-            return False
+            raise ValueError(f'Value {value} not allowed in {self.get_name()} (channel {self.channel_id}).')
 
     def get_state(self):
         return self._serial_com.read(self.get_address() + self.channel_id)
@@ -98,8 +117,8 @@ class Ttl(Signal):
     def get_address(self):
         return ADDR_TTL
 
-    def is_allowed(self, value):
-        return (value >= 0) and (value <= MAX_TTL)
+    def get_max(self):
+        return MAX_TTL
 
     def get_num_signal(self):
         return NUM_TTL
@@ -116,8 +135,8 @@ class Pwm(Signal):
     def get_address(self):
         return ADDR_PWM
 
-    def is_allowed(self, value):
-        return (value >= 0) and (value <= MAX_PWM)
+    def get_max(self):
+        return MAX_PWM
 
     def get_num_signal(self):
         return NUM_PWM
@@ -134,8 +153,8 @@ class Servo(Signal):
     def get_address(self):
         return ADDR_SERVO
 
-    def is_allowed(self, value):
-        return (value >= 0) and (value <= MAX_SERVO)
+    def get_max(self):
+        return MAX_SERVO
 
     def get_num_signal(self):
         return NUM_SERVOS
@@ -152,8 +171,8 @@ class Analog(Signal):
     def get_address(self):
         return ADDR_AI
 
-    def is_allowed(self, value):
-        return False
+    def get_max(self):
+        return -1
 
     def get_num_signal(self):
         return NUM_AI
@@ -170,8 +189,8 @@ class _Mode(Signal):
     def get_address(self):
         return ADDR_MODE
 
-    def is_allowed(self, value):
-        return (value >= 0) and (value <= MAX_MODE)
+    def get_max(self):
+        return MAX_MODE
 
     def get_num_signal(self):
         return NUM_LASERS
@@ -188,8 +207,8 @@ class _Duration(Signal):
     def get_address(self):
         return ADDR_DUR
 
-    def is_allowed(self, value):
-        return (value >= 0) and (value <= MAX_DURATION)
+    def get_max(self):
+        return MAX_DURATION
 
     def get_num_signal(self):
         return NUM_LASERS
@@ -206,8 +225,8 @@ class _Sequence(Signal):
     def get_address(self):
         return ADDR_SEQ
 
-    def is_allowed(self, value):
-        return (value >= 0) and (value <= MAX_SEQUENCE)
+    def get_max(self):
+        return MAX_SEQUENCE
 
     def get_num_signal(self):
         return NUM_LASERS
@@ -217,11 +236,6 @@ class _Sequence(Signal):
 
 
 class LaserTrigger:
-    MODE_OFF = 0
-    MODE_ON = 1
-    MODE_RISING = 2
-    MODE_FALLING = 3
-    MODE_CAMERA = 4
 
     def __init__(self, channel_id: int, serial_com: regint.RegisterInterface):
         self.channel_id = channel_id
@@ -272,8 +286,8 @@ class _CameraPulse(Signal):
     def get_address(self):
         return ADDR_CAM_PULSE
 
-    def is_allowed(self, value):
-        return (value >= 0) and (value <= MAX_CAM_PULSE)
+    def get_max(self):
+        return MAX_CAM_PULSE
 
     def get_num_signal(self):
         return 1
@@ -290,8 +304,8 @@ class _CameraPeriod(Signal):
     def get_address(self):
         return ADDR_CAM_PERIOD
 
-    def is_allowed(self, value):
-        return (value >= 0) and (value <= MAX_CAM_PERIOD)
+    def get_max(self):
+        return MAX_CAM_PERIOD
 
     def get_num_signal(self):
         return 1
@@ -308,8 +322,8 @@ class _CameraExposure(Signal):
     def get_address(self):
         return ADDR_CAM_EXPO
 
-    def is_allowed(self, value):
-        return (value >= 0) and (value <= MAX_CAM_EXPOSURE)
+    def get_max(self):
+        return MAX_CAM_EXPOSURE
 
     def get_num_signal(self):
         return 1
@@ -326,8 +340,8 @@ class _CameraStart(Signal):
     def get_address(self):
         return ADDR_START_TRIGGER
 
-    def is_allowed(self, value):
-        return value == 0 or value == 1
+    def get_max(self):
+        return 1
 
     def get_num_signal(self):
         return 1
@@ -341,6 +355,7 @@ class _CameraStart(Signal):
     def stop(self):
         return self.set_state(0)
 
+
 class TriggerMode(Signal):
 
     def __init__(self, serial_com: regint.RegisterInterface):
@@ -349,8 +364,8 @@ class TriggerMode(Signal):
     def get_address(self):
         return ADDR_ACTIVE_TRIGGER
 
-    def is_allowed(self, value):
-        return value == 0 or value == 1
+    def get_max(self):
+        return CameraTriggerMode.ACTIVE.value
 
     def get_num_signal(self):
         return 1
@@ -358,11 +373,11 @@ class TriggerMode(Signal):
     def get_name(self):
         return 'Active/passive camera trigger'
 
-    def start(self):
-        return self.set_state(1)
+    def set_active_trigger(self):
+        self.set_state(CameraTriggerMode.ACTIVE.value)
 
-    def stop(self):
-        return self.set_state(0)
+    def set_passive_trigger(self):
+        self.set_state(CameraTriggerMode.PASSIVE.value)
 
 
 class Camera:
