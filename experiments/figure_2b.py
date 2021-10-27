@@ -9,8 +9,10 @@ respectively, on each rising edge of the camera input trigger.
 
 import microfpga.controller as cl
 import microfpga.signals as sig
+from microfpga.signals import LaserTriggerMode, CameraTriggerMode
 
-with cl.MicroFPGA(n_laser=3) as mufpga:
+
+with cl.MicroFPGA(n_laser=3, use_camera=False, default_trigger=False) as mufpga:
 
     # check if successful
     if mufpga.is_connected():
@@ -18,19 +20,19 @@ with cl.MicroFPGA(n_laser=3) as mufpga:
         # set lasers state
         laser0 = {
             'channel': 0,
-            'mode': sig.LaserTrigger.MODE_RISING,
+            'mode': LaserTriggerMode.MODE_RISING.value,
             'duration': 1,
             'sequence': sig.MAX_SEQUENCE
         }
         laser1 = {
             'channel': 1,
-            'mode': sig.LaserTrigger.MODE_RISING,
+            'mode': LaserTriggerMode.MODE_RISING.value,
             'duration': 2,
             'sequence': sig.MAX_SEQUENCE
         }
         laser2 = {
             'channel': 2,
-            'mode': sig.LaserTrigger.MODE_RISING,
+            'mode': LaserTriggerMode.MODE_RISING.value,
             'duration': 3,
             'sequence': sig.MAX_SEQUENCE
         }

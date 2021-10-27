@@ -8,8 +8,10 @@ FPGA and follows the camera trigger input.
 
 import microfpga.controller as cl
 import microfpga.signals as sig
+from microfpga.signals import LaserTriggerMode, CameraTriggerMode
 
-with cl.MicroFPGA(n_laser=1) as mufpga:
+
+with cl.MicroFPGA(n_laser=1, use_camera=False, default_trigger=False) as mufpga:
 
     # check if successful
     if mufpga.is_connected():
@@ -17,7 +19,7 @@ with cl.MicroFPGA(n_laser=1) as mufpga:
         # set laser state
         laser = {
             'channel': 0,
-            'mode': sig.LaserTrigger.MODE_CAMERA,
+            'mode': LaserTriggerMode.MODE_CAMERA.value,
             'duration': 65535,
             'sequence': sig.MAX_SEQUENCE
         }

@@ -14,8 +14,10 @@ for the next two frames, and so on.
 
 import microfpga.controller as cl
 import microfpga.signals as sig
+from microfpga.signals import LaserTriggerMode, CameraTriggerMode
 
-with cl.MicroFPGA(n_laser=3) as mufpga:
+
+with cl.MicroFPGA(n_laser=3, use_camera=False, default_trigger=False) as mufpga:
 
     # check if successful
     if mufpga.is_connected():
@@ -23,19 +25,19 @@ with cl.MicroFPGA(n_laser=3) as mufpga:
         # set lasers state
         laser0 = {
             'channel': 0,
-            'mode': sig.LaserTrigger.MODE_CAMERA,
+            'mode': LaserTriggerMode.MODE_CAMERA.value,
             'duration': 1,
             'sequence': sig.format_sequence('1010101010101010')
         }
         laser1 = {
             'channel': 1,
-            'mode': sig.LaserTrigger.MODE_RISING,
+            'mode': LaserTriggerMode.MODE_RISING.value,
             'duration': 2000,
             'sequence': sig.format_sequence('0101010101010101')
         }
         laser2 = {
             'channel': 2,
-            'mode': sig.LaserTrigger.MODE_FALLING,
+            'mode': LaserTriggerMode.MODE_FALLING.value,
             'duration': 2000,
             'sequence': sig.format_sequence('1100110011001100')
         }
