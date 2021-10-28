@@ -38,12 +38,14 @@ with cl.MicroFPGA(n_laser=1, use_camera=True, default_trigger=True) as mufpga:
             mufpga.start_camera()
             print('Camera running')
 
-            time.sleep(2)  # 10 s
+            time.sleep(2)  # 2 s
 
             # stop
             mufpga.stop_camera()
             print('Camera stopped')
 
+        # change camera trigger mode to passive: the lasers are now triggered
+        # by an external trigger signal
         mufpga.set_camera_trigger_mode(CameraTriggerMode.PASSIVE.value)
 
     else:
