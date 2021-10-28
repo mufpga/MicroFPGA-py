@@ -20,6 +20,7 @@ with cl.MicroFPGA(n_laser=1, use_camera=True, default_trigger=True) as mufpga:
                 'period': 200,  # = 20 ms
                 'exposure': 190  # = 19 ms
             }
+            mufpga.set_camera_state(**camera)
 
             # define three lasers pulsing on rising edge of the camera trigger
             # with pulse lengths 1, 2 and 3 us.
