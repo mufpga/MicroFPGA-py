@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-""" Change camera trigger mode.
+"""
+Change camera trigger mode.
 """
 
 import microfpga.controller as cl
@@ -14,20 +15,25 @@ with cl.MicroFPGA(n_laser=1, use_camera=True, default_trigger=True) as mufpga:
 
         # if we are in camera trigger mode
         if mufpga.is_active_trigger():
-            # then we need to set the camera states
+            # then we need to set the camera state
+            # we can do it in milliseconds, keeping in mind the following bounds:
+            # max(pulse) = 6553,5 ms
+            # max(period) = 6553,5 ms
+            # max(exposure) = 6553,5 ms
+            # max(delay) = 655,35 ms <--- delay goes in steps an order of magnitude smaller
             camera = {
-                'pulse': 10,  # 10x100 us = 1 ms
-                'period': 200,  # = 20 ms
-                'exposure': 190,  # = 19 ms
-                'delay': 200  # = 200 us
+                'pulse': 1,  # ms
+                'period': 50,
+                'exposure': 40,
+                'delay': 0.5  # delay of 500 us between pulse and start of the exposure
             }
-            mufpga.set_camera_state(**camera)
+            mufpga.set_camera_state_ms(**camera)  # set the values in ms
 
             # define three lasers pulsing on rising edge of the camera trigger
             # with pulse lengths 1, 2 and 3 us.
             laser0 = {
                 'channel': 0,
-                'mode': LaserTriggerMode.MODE_CAMERA.value,
+                'mode': LaserTriggerMode.MODE_RISING.value,
                 'duration': 1,
                 'sequence': sig.MAX_SEQUENCE
             }
@@ -39,14 +45,16 @@ with cl.MicroFPGA(n_laser=1, use_camera=True, default_trigger=True) as mufpga:
             mufpga.start_camera()
             print('Camera running')
 
-            time.sleep(2)  # 2 s
+            # now the FPGA generates both camera and laser trigger for 2 s
+            time.sleep(2)  # in s
 
-            # stop
+            # stop, the trigger signals are off
             mufpga.stop_camera()
             print('Camera stopped')
 
         # change camera trigger mode to passive: the lasers are now triggered
-        # by an external trigger signal
+        # by an external trigger signal, they keep their triggering parameters
+        # (mode, duration, sequence)
         mufpga.set_camera_trigger_mode(CameraTriggerMode.PASSIVE.value)
 
     else:

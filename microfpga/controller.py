@@ -138,13 +138,13 @@ class MicroFPGA:
         else:
             return -1
 
-    def set_duration_state(self, channel, value):
+    def set_duration_us(self, channel, value):
         if 0 <= channel < self.get_number_lasers():
             return self._lasers[channel].set_duration(value)
         else:
             return False
 
-    def get_duration_state(self, channel):
+    def get_duration_us(self, channel):
         if 0 <= channel < self.get_number_lasers():
             return self._lasers[channel].get_duration()
         else:
@@ -223,12 +223,72 @@ class MicroFPGA:
         else:
             return -1
 
-    def set_camera_state(self, pulse, period, exposure, delay):
+    def set_camera_state(self, pulse: int, period: int, exposure: int, delay: int):
+        """
+        Set the state of the camera trigger module in arbitrary units. The camera
+        trigger module generates a periodic signal consisting of a pulse of length
+        <pulse> (in steps of 100 us), repeating every <period> (in steps of 100 us).
+        The module also generates a laser trigger signal that is then processed by the
+        laser trigger module. The laser trigger signal follows the camera trigger signal,
+        but is delayed by <delay> (in steps of 10 us) and has a pulse length of <exposure>
+        (in steps of 100 us). If <delay>+<exposure> > <period> (in physical units), then
+        <exposure> is shorten by the difference.
+
+        :param pulse: pulse length of the camera trigger signal, in steps of 100 us.
+        :param period: period of the camera trigger signal, in steps of 100 us.
+        :param exposure: camera exposure used to generate a "fire" signal to the lasers,
+         in steps of 100 us.
+        :param delay: delay between the start of the camera pulse and the start of the
+        exposure, in steps of 10 us.
+        """
         if self.get_trigger_mode():
             self._camera.set_state(pulse, period, exposure, delay)
 
     def get_camera_state(self):
+        """
+        Return the parameters of the camera trigger module in arbitrary units.
+        :return: State of the camera trigger module
+        """
         return self._camera.get_state()
+
+    def set_camera_state_ms(self, pulse: float, period: float, exposure: float, delay: float):
+        """
+        Set the state of the camera trigger module in ms. The camera
+        trigger module generates a periodic signal consisting of a pulse of length
+        <pulse>, repeating every <period>.
+        The module also generates a laser trigger signal that is then processed by the
+        laser trigger module. The laser trigger signal follows the camera trigger signal,
+        but is delayed by <delay> and has a pulse length of <exposure>
+        (in steps of 100 us). If <delay>+<exposure> > <period>, then
+        <exposure> is shorten by the difference.
+
+        :param pulse: pulse length of the camera trigger signal (maximum = 6553,5 ms).
+        :param period: period of the camera trigger signal (maximum = 6553,5 ms).
+        :param exposure: camera exposure used to generate a "fire" signal to the lasers
+         (maximum = 6553,5 ms).
+        :param delay: delay between the start of the camera pulse and the start of the
+        exposure (maximum = 655,35 ms).
+        """
+        if self.get_trigger_mode():
+            pulse_au = int(pulse*10)
+            period_au = int(period*10)
+            exposure_au = int(exposure*10)
+            delay_au = int(delay*100)
+
+            self._camera.set_state(pulse_au, period_au, exposure_au, delay_au)
+
+    def get_camera_state_ms(self):
+        """
+        Return the parameters of the camera trigger module in ms.
+        :return: State of the camera trigger module
+        """
+        state = self._camera.get_state()
+        state['pulse'] = state['pulse']/10.
+        state['period'] = state['period']/10.
+        state['exposure'] = state['exposure']/10.
+        state['delay'] = state['delay']/100.
+
+        return state
 
     def start_camera(self):
         if self.get_trigger_mode():

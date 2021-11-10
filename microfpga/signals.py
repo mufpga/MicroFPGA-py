@@ -52,7 +52,7 @@ class LaserTriggerMode(Enum):
     MODE_ON = 1
     MODE_RISING = 2
     MODE_FALLING = 3
-    MODE_CAMERA = 4
+    MODE_FOLLOW = 4
 
 
 class CameraTriggerMode(Enum):
