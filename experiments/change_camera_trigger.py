@@ -18,7 +18,8 @@ with cl.MicroFPGA(n_laser=1, use_camera=True, default_trigger=True) as mufpga:
             camera = {
                 'pulse': 10,  # 10x100 us = 1 ms
                 'period': 200,  # = 20 ms
-                'exposure': 190  # = 19 ms
+                'exposure': 190,  # = 19 ms
+                'delay': 200  # = 200 us
             }
             mufpga.set_camera_state(**camera)
 

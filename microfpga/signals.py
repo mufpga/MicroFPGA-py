@@ -20,8 +20,9 @@ ADDR_START_TRIGGER = ADDR_ACTIVE_TRIGGER + 1
 ADDR_CAM_PULSE = ADDR_START_TRIGGER + 1
 ADDR_CAM_PERIOD = ADDR_CAM_PULSE + 1
 ADDR_CAM_EXPO = ADDR_CAM_PERIOD + 1
+ADDR_LASER_DELAY = ADDR_CAM_EXPO + 1
 
-ADDR_AI = ADDR_CAM_EXPO + 1
+ADDR_AI = ADDR_LASER_DELAY + 1
 
 ADDR_VER = 200
 ADDR_ID = 201
@@ -29,6 +30,7 @@ ADDR_ID = 201
 CURR_VER = 3
 
 ID_AU = 79
+ID_AUP = 80
 ID_CU = 29
 
 MAX_MODE = 4
@@ -41,6 +43,7 @@ MAX_AI = 65535
 MAX_CAM_PULSE = 65535
 MAX_CAM_PERIOD = 65535
 MAX_CAM_EXPOSURE = 65535
+MAX_LASER_DELAY = 65535
 MAX_START = 1
 
 
@@ -332,6 +335,24 @@ class _CameraExposure(Signal):
         return 'Camera exposure'
 
 
+class _LaserDelay(Signal):
+
+    def __init__(self, serial_com: regint.RegisterInterface):
+        Signal.__init__(self, 0, serial_com)
+
+    def get_address(self):
+        return ADDR_LASER_DELAY
+
+    def get_max(self):
+        return MAX_LASER_DELAY
+
+    def get_num_signal(self):
+        return 1
+
+    def get_name(self):
+        return 'Laser trigger delay'
+
+
 class _CameraStart(Signal):
 
     def __init__(self, serial_com: regint.RegisterInterface):
@@ -386,6 +407,7 @@ class Camera:
         self._pulse = _CameraPulse(serial_com)
         self._period = _CameraPeriod(serial_com)
         self._exposure = _CameraExposure(serial_com)
+        self._delay = _LaserDelay(serial_com)
         self._start = _CameraStart(serial_com)
 
     def set_pulse(self, value):
@@ -406,15 +428,23 @@ class Camera:
     def get_exposure(self):
         return self._exposure.get_state()
 
-    def set_state(self, pulse, period, exposure):
+    def set_delay(self, value):
+        return self._delay.set_state(value)
+
+    def get_delay(self):
+        return self._delay.get_state()
+
+    def set_state(self, pulse, period, exposure, delay):
         self.set_pulse(pulse)
         self.set_period(period)
         self.set_exposure(exposure)
+        self.set_delay(delay)
 
     def get_state(self):
         return {'pulse': self.get_pulse(),
                 'period': self.get_period(),
-                'exposure': self.get_exposure()}
+                'exposure': self.get_exposure(),
+                'delay': self.get_delay()}
 
     def start(self):
         return self._start.start()

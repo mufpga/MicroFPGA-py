@@ -213,9 +213,19 @@ class MicroFPGA:
         else:
             return -1
 
-    def set_camera_state(self, pulse, period, exposure):
+    def set_laser_delay(self, value):
         if self.get_trigger_mode():
-            self._camera.set_state(pulse, period, exposure)
+            self._camera.set_delay(value)
+
+    def get_laser_delay(self):
+        if self.get_trigger_mode():
+            return self._camera.get_delay()
+        else:
+            return -1
+
+    def set_camera_state(self, pulse, period, exposure, delay):
+        if self.get_trigger_mode():
+            self._camera.set_state(pulse, period, exposure, delay)
 
     def get_camera_state(self):
         return self._camera.get_state()
@@ -237,6 +247,8 @@ class MicroFPGA:
     def get_id(self):
         if self._id == signals.ID_AU:
             return 'Au'
+        elif self._id == signals.ID_AUP:
+            return 'Au+'
         elif self._id == signals.ID_CU:
             return 'Cu'
         else:
