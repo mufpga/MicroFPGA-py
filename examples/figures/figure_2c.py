@@ -47,8 +47,8 @@ with cl.MicroFPGA(n_laser=3, use_camera=False, default_trigger=False) as mufpga:
 
         # read lasers state
         print(f'Current Laser 0 state: {mufpga.get_laser_state(0)}')
-        print(f'Current Laser 0 state: {mufpga.get_laser_state(1)}')
-        print(f'Current Laser 0 state: {mufpga.get_laser_state(2)}')
+        print(f'Current Laser 1 state: {mufpga.get_laser_state(1)}')
+        print(f'Current Laser 2 state: {mufpga.get_laser_state(2)}')
 
     else:
         print('Failed to connected')

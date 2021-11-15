@@ -16,10 +16,10 @@ with cl.MicroFPGA(n_laser=1, use_camera=True, default_trigger=True) as mufpga:
         if mufpga.is_active_trigger():
             # then we need to set the camera state
             # we can do it in milliseconds, keeping in mind the following bounds:
-            # max(pulse) = 6553,5 ms
-            # max(period) = 6553,5 ms
-            # max(exposure) = 6553,5 ms
-            # max(delay) = 655,35 ms <--- delay goes in steps an order of magnitude smaller
+            # max(pulse) = 0 to 6553,5 ms (in steps of 0.1 ms)
+            # max(period) = 0 to 6553,5 ms
+            # max(exposure) = 0 to 6553,5 ms
+            # max(delay) = 0 to 655,35 ms <--- delay goes in steps of 0.01 ms
             camera = {
                 'pulse': 1,  # ms
                 'period': 50,
