@@ -34,7 +34,7 @@ with cl.MicroFPGA(n_laser=1, use_camera=True, default_trigger=True) as mufpga:
             # define one laser pulsing on rising edge of the camera trigger with pulse lengths 1 us.
             laser0 = {
                 'channel': 0,
-                'mode': LaserTriggerMode.MODE_RISING.value,
+                'mode': LaserTriggerMode.MODE_RISING,
                 'duration': 1,  # in us
                 'sequence': sig.MAX_SEQUENCE
             }

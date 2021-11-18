@@ -103,8 +103,7 @@ class Signal(ABC):
 
     def set_state(self, value: int):
         if self.output and self.is_allowed(value):
-            self._serial_com.write(self.get_address() + self.channel_id, value)
-            return True
+            return self._serial_com.write(self.get_address() + self.channel_id, value)
         else:
             raise ValueError(f'Value {value} not allowed in {self.get_name()} (channel {self.channel_id}).')
 
@@ -200,15 +199,15 @@ class _Mode(Signal):
 
     def is_allowed(self, value):
         if isinstance(value, LaserTriggerMode):
-            return Signal.is_allowed(value.value)
+            return Signal.is_allowed(self, value.value)
         else:
-            Signal.is_allowed(value)
+            return Signal.is_allowed(self, value)
 
     def set_state(self, value):
         if isinstance(value, LaserTriggerMode):
-            return Signal.set_state(value.value)
+            return Signal.set_state(self, value.value)
         else:
-            Signal.set_state(value)
+            return Signal.set_state(self, value)
 
     def get_name(self):
         return 'Laser mode'
@@ -280,13 +279,18 @@ class LaserTrigger:
     def set_state(self, mode, duration, sequence):
         b = self.set_mode(mode)
         if not b:
+            print(f'Laser {self.channel_id}: could not set Mode properly {b}.')
             return b
 
         b = self.set_duration(duration)
         if not b:
+            print(f'Laser {self.channel_id}: could not set Duration properly.')
             return b
 
         b = self.set_sequence(sequence)
+        if not b:
+            print(f'Laser {self.channel_id}: could not set Sequence properly.')
+
         return b
 
     def get_state(self):

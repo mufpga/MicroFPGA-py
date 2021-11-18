@@ -72,6 +72,8 @@ class RegisterInterface:
     def write(self, address, value):
         if self._connected:
             self._serial.write(self.__format_write_request(address, value))
+            return True
+        return False
 
     def read(self, address):
         if self._connected:

@@ -34,7 +34,7 @@ with cl.MicroFPGA(n_laser=3, use_camera=True, default_trigger=True) as mufpga:
             # define three lasers.
             laser0 = {
                 'channel': 0,
-                'mode': LaserTriggerMode.MODE_FOLLOW.value,
+                'mode': LaserTriggerMode.MODE_FOLLOW,
                 'duration': 1,
                 'sequence': sig.format_sequence('1010101010101010')
             }
@@ -58,7 +58,7 @@ with cl.MicroFPGA(n_laser=3, use_camera=True, default_trigger=True) as mufpga:
             mufpga.start_camera()
             print('Camera running')
 
-            # now the FPGA generates both camera and laser trigger for 15 s
+            # now the FPGA generates both camera and laser trigger for 2 s
             time.sleep(2)  # in s
 
             # stop, the trigger signals are off
