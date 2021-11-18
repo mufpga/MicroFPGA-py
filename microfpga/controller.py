@@ -304,6 +304,12 @@ class MicroFPGA:
         else:
             return False
 
+    def set_active_trigger(self):
+        self._trigger_mode.set_active_trigger()
+
+    def set_passive_trigger(self):
+        self._trigger_mode.set_passive_trigger()
+
     def get_id(self):
         if self._id == signals.ID_AU:
             return 'Au'

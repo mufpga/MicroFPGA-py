@@ -33,7 +33,7 @@ with cl.MicroFPGA(n_laser=1, use_camera=True, default_trigger=True) as mufpga:
             # with pulse lengths 1, 2 and 3 us.
             laser0 = {
                 'channel': 0,
-                'mode': LaserTriggerMode.MODE_RISING.value(),
+                'mode': LaserTriggerMode.MODE_RISING.value,
                 'duration': 1,
                 'sequence': sig.MAX_SEQUENCE
             }
@@ -55,7 +55,7 @@ with cl.MicroFPGA(n_laser=1, use_camera=True, default_trigger=True) as mufpga:
         # change camera trigger mode to passive: the lasers are now triggered
         # by an external trigger signal, they keep their triggering parameters
         # (mode, duration, sequence)
-        mufpga.set_camera_trigger_mode(CameraTriggerMode.PASSIVE.value)
+        mufpga.set_passive_trigger()
 
     else:
         print('Failed to connected')

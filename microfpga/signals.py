@@ -200,13 +200,13 @@ class _Mode(Signal):
 
     def is_allowed(self, value):
         if isinstance(value, LaserTriggerMode):
-            return Signal.is_allowed(value.value())
+            return Signal.is_allowed(value.value)
         else:
             Signal.is_allowed(value)
 
     def set_state(self, value):
         if isinstance(value, LaserTriggerMode):
-            return Signal.set_state(value.value())
+            return Signal.set_state(value.value)
         else:
             Signal.set_state(value)
 
@@ -398,7 +398,7 @@ class TriggerMode(Signal):
         return ADDR_ACTIVE_TRIGGER
 
     def get_max(self):
-        return CameraTriggerMode.ACTIVE.value()
+        return CameraTriggerMode.ACTIVE.value
 
     def get_num_signal(self):
         return 1
@@ -407,10 +407,10 @@ class TriggerMode(Signal):
         return 'Active/passive camera trigger'
 
     def set_active_trigger(self):
-        self.set_state(CameraTriggerMode.ACTIVE.value())
+        self.set_state(CameraTriggerMode.ACTIVE.value)
 
     def set_passive_trigger(self):
-        self.set_state(CameraTriggerMode.PASSIVE.value())
+        self.set_state(CameraTriggerMode.PASSIVE.value)
 
 
 class Camera:

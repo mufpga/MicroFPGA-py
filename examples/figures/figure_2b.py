@@ -20,19 +20,19 @@ with cl.MicroFPGA(n_laser=3, use_camera=False, default_trigger=False) as mufpga:
         # set lasers state
         laser0 = {
             'channel': 0,
-            'mode': LaserTriggerMode.MODE_RISING.value(),
+            'mode': LaserTriggerMode.MODE_RISING.value,
             'duration': 1,
             'sequence': sig.MAX_SEQUENCE
         }
         laser1 = {
             'channel': 1,
-            'mode': LaserTriggerMode.MODE_RISING.value(),
+            'mode': LaserTriggerMode.MODE_RISING.value,
             'duration': 2,
             'sequence': sig.MAX_SEQUENCE
         }
         laser2 = {
             'channel': 2,
-            'mode': LaserTriggerMode.MODE_RISING.value(),
+            'mode': LaserTriggerMode.MODE_RISING.value,
             'duration': 3,
             'sequence': sig.MAX_SEQUENCE
         }

@@ -19,7 +19,7 @@ with cl.MicroFPGA(n_laser=1, use_camera=False, default_trigger=False) as mufpga:
         # set laser state
         laser = {
             'channel': 0,
-            'mode': LaserTriggerMode.MODE_FOLLOW.value(),
+            'mode': LaserTriggerMode.MODE_FOLLOW.value,
             'duration': 65535,
             'sequence': sig.MAX_SEQUENCE
         }
