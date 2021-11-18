@@ -7,7 +7,7 @@ import microfpga.signals as sig
 from microfpga.signals import LaserTriggerMode
 import time
 
-# use_camera=True and default_trigger=True are the defaults and could be omitted
+# use_camera=True is default and could be omitted
 with cl.MicroFPGA(n_laser=3, use_camera=True) as mufpga:
     # check if successful
     if mufpga.is_connected():
