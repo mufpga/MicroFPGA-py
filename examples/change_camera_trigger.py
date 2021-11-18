@@ -33,7 +33,7 @@ with cl.MicroFPGA(n_laser=1, use_camera=True, default_trigger=True) as mufpga:
             # with pulse lengths 1, 2 and 3 us.
             laser0 = {
                 'channel': 0,
-                'mode': LaserTriggerMode.MODE_RISING.value,
+                'mode': LaserTriggerMode.MODE_RISING.value(),
                 'duration': 1,
                 'sequence': sig.MAX_SEQUENCE
             }
