@@ -21,10 +21,10 @@ with cl.MicroFPGA(n_laser=3, use_camera=True) as mufpga:
             # max(exposure) = 0 to 6553,5 ms
             # max(delay) = 0 to 655,35 ms <--- delay goes in steps of 0.01 ms
             camera = {
-                'pulse': 1,  # ms
+                'pulse': 1.4,  # ms
                 'period': 21.5,
                 'exposure': 20,
-                'delay': 0.5  # delay of 500 us between camera pulse and start of the exposure
+                'delay': 0.3  # delay of 300 us between camera pulse and start of the exposure
             }
             mufpga.set_camera_state_ms(**camera)  # set the values in ms
 
@@ -36,19 +36,19 @@ with cl.MicroFPGA(n_laser=3, use_camera=True) as mufpga:
                 'channel': 0,
                 'mode': LaserTriggerMode.MODE_FOLLOW,
                 'duration': 1,
-                'sequence': sig.format_sequence('1010101010101010')
+                'sequence': sig.MAX_SEQUENCE
             }
             laser1 = {
                 'channel': 1,
-                'mode': LaserTriggerMode.MODE_RISING.value,
-                'duration': 4000,
+                'mode': LaserTriggerMode.MODE_RISING,
+                'duration': 6500,
                 'sequence': sig.format_sequence('0101010101010101')
             }
             laser2 = {
                 'channel': 2,
-                'mode': LaserTriggerMode.MODE_FALLING.value,
-                'duration': 2000,
-                'sequence': sig.format_sequence('1100110011001100')
+                'mode': LaserTriggerMode.MODE_FALLING,
+                'duration': 1000,
+                'sequence': sig.format_sequence('1010101010101010')
             }
             mufpga.set_laser_state(**laser0)
             mufpga.set_laser_state(**laser1)
