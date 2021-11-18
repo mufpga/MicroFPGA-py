@@ -17,7 +17,7 @@ import microfpga.signals as sig
 from microfpga.signals import LaserTriggerMode, CameraTriggerMode
 
 
-with cl.MicroFPGA(n_laser=3, use_camera=False, default_trigger=False) as mufpga:
+with cl.MicroFPGA(n_laser=3, use_camera=False) as mufpga:
 
     # check if successful
     if mufpga.is_connected():

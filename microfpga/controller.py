@@ -3,7 +3,7 @@ from microfpga import regint
 
 
 class MicroFPGA:
-    def __init__(self, n_laser=0, n_ttl=0, n_servo=0, n_pwm=0, n_ai=0, use_camera=True, default_trigger=True):
+    def __init__(self, n_laser=0, n_ttl=0, n_servo=0, n_pwm=0, n_ai=0, use_camera=True):
         self._serial = regint.RegisterInterface()
         self.device = self._serial.get_device()
 
@@ -43,7 +43,11 @@ class MicroFPGA:
                 if use_camera:
                     self._camera = signals.Camera(self._serial)
                     self._trigger_mode = signals.TriggerMode(self._serial)
-                    self._trigger_mode.set_state(default_trigger)
+                    self._trigger_mode.set_active_trigger()
+                else:
+                    self._camera = None
+                    self._trigger_mode = None
+                    signals.TriggerMode(self._serial).set_passive_trigger()
 
             else:
                 self.disconnect()
@@ -175,13 +179,19 @@ class MicroFPGA:
             return [-1, -1, -1]
 
     def set_camera_trigger_mode(self, trigger_mode):
-        return self._trigger_mode.set_state(trigger_mode)
+        if self._trigger_mode is None:
+            return False
+        else:
+            return self._trigger_mode.set_state(trigger_mode)
 
     def get_trigger_mode(self):
-        return self._trigger_mode.get_state()
+        if self._trigger_mode is None:
+            return False
+        else:
+            return self._trigger_mode.get_state()
 
     def is_active_trigger(self):
-        return self._trigger_mode.get_state()
+        return self.get_trigger_mode() == True
 
     def set_camera_pulse(self, value):
         if self.get_trigger_mode():
@@ -270,10 +280,10 @@ class MicroFPGA:
         exposure (maximum = 655,35 ms).
         """
         if self.get_trigger_mode():
-            pulse_au = int(pulse*10)
-            period_au = int(period*10)
-            exposure_au = int(exposure*10)
-            delay_au = int(delay*100)
+            pulse_au = int(pulse * 10)
+            period_au = int(period * 10)
+            exposure_au = int(exposure * 10)
+            delay_au = int(delay * 100)
 
             self._camera.set_state(pulse_au, period_au, exposure_au, delay_au)
 
@@ -283,10 +293,10 @@ class MicroFPGA:
         :return: State of the camera trigger module
         """
         state = self._camera.get_state()
-        state['pulse'] = state['pulse']/10.
-        state['period'] = state['period']/10.
-        state['exposure'] = state['exposure']/10.
-        state['delay'] = state['delay']/100.
+        state['pulse'] = state['pulse'] / 10.
+        state['period'] = state['period'] / 10.
+        state['exposure'] = state['exposure'] / 10.
+        state['delay'] = state['delay'] / 100.
 
         return state
 
