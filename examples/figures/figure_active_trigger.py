@@ -58,8 +58,8 @@ with cl.MicroFPGA(n_laser=3, use_camera=True) as mufpga:
             mufpga.start_camera()
             print('Camera running')
 
-            # now the FPGA generates both camera and laser trigger for 3 s
-            time.sleep(3)  # in s
+            # now the FPGA generates both camera and laser trigger for 5 s
+            time.sleep(5)  # in s
 
             # stop, the trigger signals are off
             mufpga.stop_camera()
