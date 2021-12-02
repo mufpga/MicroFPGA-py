@@ -8,7 +8,7 @@ FPGA and follows the camera trigger input.
 
 import microfpga.controller as cl
 import microfpga.signals as sig
-from microfpga.signals import LaserTriggerMode, CameraTriggerMode
+from microfpga.signals import LaserTriggerMode
 
 
 with cl.MicroFPGA(n_laser=1, use_camera=False) as mufpga:

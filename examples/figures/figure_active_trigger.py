@@ -21,10 +21,10 @@ with cl.MicroFPGA(n_laser=3, use_camera=True) as mufpga:
             # max(exposure) = 0 to 6553,5 ms
             # max(delay) = 0 to 655,35 ms <--- delay goes in steps of 0.01 ms
             camera = {
-                'pulse': 1.4,  # ms
-                'period': 21.5,
-                'exposure': 20,
-                'delay': 0.3  # delay of 300 us between camera pulse and start of the exposure
+                'pulse': 1.5,  # ms
+                'period': 12.5,
+                'exposure': 10,
+                'delay': 0.5  # delay of 300 us between camera pulse and start of the exposure
             }
             mufpga.set_camera_state_ms(**camera)  # set the values in ms
 
@@ -58,8 +58,8 @@ with cl.MicroFPGA(n_laser=3, use_camera=True) as mufpga:
             mufpga.start_camera()
             print('Camera running')
 
-            # now the FPGA generates both camera and laser trigger for 2 s
-            time.sleep(2)  # in s
+            # now the FPGA generates both camera and laser trigger for 3 s
+            time.sleep(3)  # in s
 
             # stop, the trigger signals are off
             mufpga.stop_camera()

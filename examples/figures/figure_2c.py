@@ -14,7 +14,7 @@ for the next two frames, and so on.
 
 import microfpga.controller as cl
 import microfpga.signals as sig
-from microfpga.signals import LaserTriggerMode, CameraTriggerMode
+from microfpga.signals import LaserTriggerMode
 
 
 with cl.MicroFPGA(n_laser=3, use_camera=False) as mufpga:

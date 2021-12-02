@@ -9,7 +9,7 @@ respectively, on each rising edge of the camera input trigger.
 
 import microfpga.controller as cl
 import microfpga.signals as sig
-from microfpga.signals import LaserTriggerMode, CameraTriggerMode
+from microfpga.signals import LaserTriggerMode
 
 
 with cl.MicroFPGA(n_laser=3, use_camera=False) as mufpga:
