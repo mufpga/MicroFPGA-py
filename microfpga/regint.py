@@ -7,7 +7,7 @@ class RegisterInterface:
         self._device = self.__find_port()
 
         if self._device is not None:
-            self._serial = serial.Serial(self._device, 1000000, timeout=1)
+            self._serial = serial.Serial(self._device, 57600, timeout=1)
             self._connected = True
         else:
             self._serial = None
