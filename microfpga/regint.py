@@ -7,7 +7,7 @@ class RegisterInterface:
         self._device = self.__find_port()
 
         if self._device is not None:
-            self._serial = serial.Serial(self._device, 1000000, timeout=1)
+            self._serial = serial.Serial(self._device, 57600, timeout=1)
             self._connected = True
         else:
             self._serial = None
@@ -72,6 +72,8 @@ class RegisterInterface:
     def write(self, address, value):
         if self._connected:
             self._serial.write(self.__format_write_request(address, value))
+            return True
+        return False
 
     def read(self, address):
         if self._connected:
