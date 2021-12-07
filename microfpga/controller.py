@@ -58,9 +58,9 @@ class MicroFPGA:
                                   ', got ' + str(self._version) + '. The port has been disconnected')
 
                 if not (self._id in signals.get_compatible_ids()):
-                    raise Warning(f'Wrong board id: expected {signals.ID_AU} (Au),'
-                                  f' {signals.ID_AUP} (Au+), {signals.ID_CU} (Cu) or'
-                                  f' {signals.ID_MOJO} (Mojo),'
+                    raise Warning(f'Wrong board id: expected {signals.ID_MOJO} (Mojo),'
+                                  f' {signals.ID_CU} (Cu), {signals.ID_AU} (Au) or'
+                                  f' {signals.ID_AUP} (Au+),'
                                   f' got {self._id}. The port has been disconnected')
 
     def __enter__(self):
