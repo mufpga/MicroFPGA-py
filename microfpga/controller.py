@@ -1,6 +1,7 @@
 from microfpga import signals
 from microfpga import regint
 
+
 class MicroFPGA:
 
     def __init__(self, n_laser=0, n_ttl=0, n_servo=0, n_pwm=0, n_ai=0, use_camera=True):
@@ -17,9 +18,7 @@ class MicroFPGA:
             self._id = self._serial.read(signals.ADDR_ID)
 
             if (self._version == signals.CURR_VER) and \
-                    (self._id == signals.ID_AU or
-                     self._id == signals.ID_AUP or
-                     self._id == signals.ID_CU):
+                    self._id in signals.get_compatible_ids():
                 # instantiate lasers
                 for i in range(n_laser):
                     self._lasers.append(signals.LaserTrigger(i, self._serial))
@@ -37,7 +36,7 @@ class MicroFPGA:
                     self._pwms.append(signals.Pwm(i, self._serial))
 
                 # instantiate analog inputs
-                if self._id == signals.ID_AU:
+                if self._id in signals.get_analog_ids():
                     for i in range(n_ai):
                         self._ais.append(signals.Analog(i, self._serial))
 
@@ -58,11 +57,10 @@ class MicroFPGA:
                     raise Warning('Wrong version: expected ' + str(signals.CURR_VER) + \
                                   ', got ' + str(self._version) + '. The port has been disconnected')
 
-                if self._id != signals.ID_AU and \
-                        self._id != signals.ID_AUP and \
-                        self._id != signals.ID_CU:
+                if not (self._id in signals.get_compatible_ids()):
                     raise Warning(f'Wrong board id: expected {signals.ID_AU} (Au),'
-                                  f' {signals.ID_AUP} (Au+) or {signals.ID_CU} (Cu),'
+                                  f' {signals.ID_AUP} (Au+), {signals.ID_CU} (Cu) or'
+                                  f' {signals.ID_MOJO} (Mojo),'
                                   f' got {self._id}. The port has been disconnected')
 
     def __enter__(self):
@@ -332,5 +330,7 @@ class MicroFPGA:
             return 'Au+'
         elif self._id == signals.ID_CU:
             return 'Cu'
+        elif self._id == signals.ID_MOJO:
+            return 'Mojo'
         else:
             return 'Unknown'

@@ -32,6 +32,7 @@ CURR_VER = 3
 ID_AU = 79
 ID_AUP = 80
 ID_CU = 29
+ID_MOJO = 12
 
 MAX_MODE = 4
 MAX_DURATION = 65535
@@ -70,6 +71,14 @@ def format_sequence(string):
         return int(string, 2)
     else:
         return -1
+
+
+def get_compatible_ids():
+    return ID_AU, ID_AUP, ID_CU, ID_MOJO
+
+
+def get_analog_ids():
+    return ID_AU, ID_AUP, ID_MOJO
 
 
 class Signal(ABC):
