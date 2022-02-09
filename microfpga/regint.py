@@ -66,6 +66,7 @@ class RegisterInterface:
         return buff
 
     def __format_to_int(self, data):
+        assert len(data) == 4, f'Data has the wrong number of bytes (got {len(data)}, expected 4)'
         val = (data[0] & 0xff) | (data[1] & 0xff) << 8 | (data[2] & 0xff) << 16 | (data[3] & 0xff) << 24
         return val
 
