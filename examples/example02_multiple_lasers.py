@@ -53,6 +53,11 @@ with cl.MicroFPGA(n_laser=3, use_camera=False) as mufpga:
         print(f'Current Laser 1 state: {mufpga.get_laser_state(1)}')
         print(f'Current Laser 2 state: {mufpga.get_laser_state(2)}')
 
+        assert [laser2['mode'].value,
+                laser2['duration'],
+                laser2['sequence']] == mufpga.get_laser_state(laser2['channel'])
+
+
     else:
         print('Failed to connect')
 

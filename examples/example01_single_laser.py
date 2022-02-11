@@ -28,7 +28,7 @@ with cl.MicroFPGA(n_laser=1, use_camera=False) as mufpga:
         laser = {
             'channel': laser_id,
             'mode': LaserTriggerMode.MODE_RISING,  # pulsing on rising edge of camera input
-            'duration': 1000,  # pulse length
+            'duration': 1_000,  # pulse length
             'sequence': sig.format_sequence('1010101010101010')  # sequence of on/off frames
         }
 
@@ -37,6 +37,9 @@ with cl.MicroFPGA(n_laser=1, use_camera=False) as mufpga:
 
         # read current laser state
         print(f'Current Laser 0 state: {mufpga.get_laser_state(0)}')
+        assert [laser['mode'].value,
+                laser['duration'],
+                laser['sequence']] == mufpga.get_laser_state(laser['channel'])
 
         # we can change again the parameters
         laser['mode'] = LaserTriggerMode.MODE_FALLING

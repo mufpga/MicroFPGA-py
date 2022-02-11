@@ -15,11 +15,11 @@ ADDR_TTL = ADDR_SEQ + NUM_LASERS
 ADDR_SERVO = ADDR_TTL + NUM_TTL
 ADDR_PWM = ADDR_SERVO + NUM_SERVOS
 
-ADDR_ACTIVE_TRIGGER = ADDR_PWM + NUM_PWM
-ADDR_START_TRIGGER = ADDR_ACTIVE_TRIGGER + 1
+ADDR_ACTIVE_SYNC = ADDR_PWM + NUM_PWM
+ADDR_START_TRIGGER = ADDR_ACTIVE_SYNC + 1
 ADDR_CAM_PULSE = ADDR_START_TRIGGER + 1
-ADDR_CAM_PERIOD = ADDR_CAM_PULSE + 1
-ADDR_CAM_EXPO = ADDR_CAM_PERIOD + 1
+ADDR_CAM_READOUT = ADDR_CAM_PULSE + 1
+ADDR_CAM_EXPO = ADDR_CAM_READOUT + 1
 ADDR_LASER_DELAY = ADDR_CAM_EXPO + 1
 
 ADDR_AI = ADDR_LASER_DELAY + 1
@@ -41,9 +41,9 @@ MAX_TTL = 1
 MAX_SERVO = 65535
 MAX_PWM = 255
 MAX_AI = 65535
-MAX_CAM_PULSE = 65535
-MAX_CAM_PERIOD = 65535
-MAX_CAM_EXPOSURE = 65535
+MAX_CAM_PULSE = 1048575
+MAX_CAM_READOUT = 65535
+MAX_CAM_EXPOSURE = 1048575
 MAX_LASER_DELAY = 65535
 MAX_START = 1
 
@@ -56,9 +56,16 @@ class LaserTriggerMode(Enum):
     MODE_FOLLOW = 4
 
 
-class CameraTriggerMode(Enum):
+class TriggerSyncMode(Enum):
     ACTIVE = 1
     PASSIVE = 0
+
+
+class CameraModuleStates(Enum):
+    PULSE = 'pulse'
+    DELAY = 'delay'
+    EXPOSURE = 'exposure'
+    READOUT = 'read-out'
 
 
 def format_sequence(string):
@@ -321,25 +328,25 @@ class _CameraPulse(Signal):
         return 1
 
     def get_name(self):
-        return 'Camera trigger pulse'
+        return 'Camera fire pulse length'
 
 
-class _CameraPeriod(Signal):
+class _CameraReadout(Signal):
 
     def __init__(self, serial_com: regint.RegisterInterface):
         Signal.__init__(self, 0, serial_com)
 
     def get_address(self):
-        return ADDR_CAM_PERIOD
+        return ADDR_CAM_READOUT
 
     def get_max(self):
-        return MAX_CAM_PERIOD
+        return MAX_CAM_READOUT
 
     def get_num_signal(self):
         return 1
 
     def get_name(self):
-        return 'Camera trigger period'
+        return 'Camera read-out time'
 
 
 class _CameraExposure(Signal):
@@ -375,7 +382,7 @@ class _LaserDelay(Signal):
         return 1
 
     def get_name(self):
-        return 'Laser trigger delay'
+        return 'Laser trigger delay with respect to the camera fire'
 
 
 class _CameraStart(Signal):
@@ -402,35 +409,35 @@ class _CameraStart(Signal):
         return self.set_state(0)
 
 
-class TriggerMode(Signal):
+class SyncMode(Signal):
 
     def __init__(self, serial_com: regint.RegisterInterface):
         Signal.__init__(self, 0, serial_com)
 
     def get_address(self):
-        return ADDR_ACTIVE_TRIGGER
+        return ADDR_ACTIVE_SYNC
 
     def get_max(self):
-        return CameraTriggerMode.ACTIVE.value
+        return TriggerSyncMode.ACTIVE.value
 
     def get_num_signal(self):
         return 1
 
     def get_name(self):
-        return 'Active/passive camera trigger'
+        return 'Active/passive synchronisation'
 
-    def set_active_trigger(self):
-        self.set_state(CameraTriggerMode.ACTIVE.value)
+    def set_active_sync(self):
+        self.set_state(TriggerSyncMode.ACTIVE.value)
 
-    def set_passive_trigger(self):
-        self.set_state(CameraTriggerMode.PASSIVE.value)
+    def set_passive_sync(self):
+        self.set_state(TriggerSyncMode.PASSIVE.value)
 
 
 class Camera:
 
     def __init__(self, serial_com: regint.RegisterInterface):
         self._pulse = _CameraPulse(serial_com)
-        self._period = _CameraPeriod(serial_com)
+        self._readout = _CameraReadout(serial_com)
         self._exposure = _CameraExposure(serial_com)
         self._delay = _LaserDelay(serial_com)
         self._start = _CameraStart(serial_com)
@@ -441,11 +448,11 @@ class Camera:
     def get_pulse(self):
         return self._pulse.get_state()
 
-    def set_period(self, value):
-        return self._period.set_state(value)
+    def set_readout(self, value):
+        return self._readout.set_state(value)
 
-    def get_period(self):
-        return self._period.get_state()
+    def get_readout(self):
+        return self._readout.get_state()
 
     def set_exposure(self, value):
         return self._exposure.set_state(value)
@@ -459,17 +466,17 @@ class Camera:
     def get_delay(self):
         return self._delay.get_state()
 
-    def set_state(self, pulse, period, exposure, delay):
+    def set_state(self, pulse, delay, exposure, readout):
         self.set_pulse(pulse)
-        self.set_period(period)
-        self.set_exposure(exposure)
         self.set_delay(delay)
+        self.set_exposure(exposure)
+        self.set_readout(readout)
 
     def get_state(self):
-        return {'pulse': self.get_pulse(),
-                'period': self.get_period(),
-                'exposure': self.get_exposure(),
-                'delay': self.get_delay()}
+        return {CameraModuleStates.PULSE.value: self.get_pulse(),
+                CameraModuleStates.DELAY.value: self.get_delay(),
+                CameraModuleStates.EXPOSURE.value: self.get_exposure(),
+                CameraModuleStates.READOUT.value: self.get_readout()}
 
     def start(self):
         return self._start.start()

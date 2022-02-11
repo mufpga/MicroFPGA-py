@@ -1,36 +1,35 @@
 #!/usr/bin/env python
-""" Demonstrate active camera triggering with a single laser.
+""" Demonstrate active camera synchronisation with a single laser.
 
-In active mode, the FPGA generates a camera trigger signal, as well as
-an exposure signal. The camera trigger signal is an output of the
-FPGA and can be directly connected to the external trigger of a camera.
+In active sync mode, the FPGA generates a camera fire signal, as well as
+an internal exposure signal. The camera fire signal is an output of the
+FPGA and can be directly connected to the input trigger of a camera.
 The exposure signal generated is purely internal and is processed
 by the laser trigger modules (see Example01 and Example02).
 
 In addition to the laser trigger parameters, we need to set a number of
 camera trigger parameters:
 - pulse: pulse length in ms of the camera trigger signal, comprised
-          between 0 and 6553.5 ms in steps of 0.1 ms.
-- period: period in ms of the camera trigger signal, comprised
-          between 0 and 6553.5 ms in steps of 0.1 ms.
+          between 0 and 1048.575 ms (over 1 s).
+- read-out: period in ms of the camera trigger signal, comprised
+          between 0 and 65.535 ms in steps of 1 us.
 - exposure: pulse length in ms of the exposure signal, the period is
             the same as the camera trigger signal, and the value is
-             comprised between 0 and 6553.5 ms in steps of 0.1 ms.
+             comprised between  0 and 1048.575 ms (over 1 s)..
 - delay: delay in ms of the exposure signal with respect to the camera
-        trigger rising edge, comprised between 0 and 655.35 ms in steps
-        of 0.01 ms.
+        trigger rising edge, comprised between 65.535 ms in steps of 1 us.
 
 The signals therefore look like the following:
-             <-------------period------------>
+                                          <--> read-out
              <-pulse->
              ---------                        ---------      high
             |         |                      |         |
 camera -----         ------------------------          ----- low
 
-                  <---------exposure--------->
-                  ---------------------------      ----------- high
-                 |                           |    |
-exposure --------                            -----            low
+                  <-------exposure------->
+                  -------------------------      ----------- high
+                 |                        |    |
+to lasers--------                         -----              low
             <---> delay
 """
 
@@ -47,20 +46,21 @@ with cl.MicroFPGA(n_laser=1) as mufpga:
         # print id
         print(f'Connected to {mufpga.get_id()}')
 
-        # we are in camera trigger mode by default
-        print(f'Active camera trigger: {mufpga.is_active_trigger()}')
+        # we are in camera-laser sync mode by default
+        print(f'Active trigger synchronisation: {mufpga.is_active_sync()}')
+        assert mufpga.is_active_sync()
 
         # then we need to set the camera state
         # we can do it in milliseconds, keeping in mind the following bounds:
-        # max(pulse) = 0 to 6553,5 ms (in steps of 0.1 ms)
-        # max(period) = 0 to 6553,5 ms
-        # max(exposure) = 0 to 6553,5 ms
-        # max(delay) = 0 to 655,35 ms <--- delay goes in steps of 0.01 ms
+        # max(pulse) = 0 to 1048,575 ms (in steps of 1 us)
+        # max(delay) = 0 to 65.535 ms
+        # max(exposure) = 0 to 1048,575 ms
+        # max(readout) = 0 to 65.535 ms
         camera = {
             'pulse': 1,  # ms
-            'period': 21,
+            'delay': 0.5,  # delay of 500 us between camera pulse and start of the exposure
             'exposure': 19.5,
-            'delay': 0.5  # delay of 500 us between camera pulse and start of the exposure
+            'readout': 1,
         }
         mufpga.set_camera_state_ms(**camera)  # set the values in ms
 
@@ -83,6 +83,8 @@ with cl.MicroFPGA(n_laser=1) as mufpga:
 
         # now the FPGA generates both camera and laser trigger for 2 s
         time.sleep(2)  # in s
+
+        assert mufpga.is_camera_running()
 
         # stop, the trigger signals are off
         mufpga.stop_camera()

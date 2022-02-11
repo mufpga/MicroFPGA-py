@@ -13,18 +13,12 @@ with cl.MicroFPGA(n_laser=3, use_camera=True) as mufpga:
     if mufpga.is_connected():
 
         # if we are in camera trigger mode
-        if mufpga.is_active_trigger():
-            # then we need to set the camera state
-            # we can do it in milliseconds, keeping in mind the following bounds:
-            # max(pulse) = 0 to 6553,5 ms (in steps of 0.1 ms)
-            # max(period) = 0 to 6553,5 ms
-            # max(exposure) = 0 to 6553,5 ms
-            # max(delay) = 0 to 655,35 ms <--- delay goes in steps of 0.01 ms
+        if mufpga.is_active_sync():
             camera = {
                 'pulse': 1.5,  # ms
-                'period': 12.5,
+                'delay': 0.5,
                 'exposure': 10,
-                'delay': 0.5  # delay of 300 us between camera pulse and start of the exposure
+                'readout': 2,
             }
             mufpga.set_camera_state_ms(**camera)  # set the values in ms
 

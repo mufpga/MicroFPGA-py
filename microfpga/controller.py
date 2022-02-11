@@ -1,5 +1,6 @@
 from microfpga import signals
 from microfpga import regint
+from microfpga.signals import CameraModuleStates
 
 
 class MicroFPGA:
@@ -43,12 +44,12 @@ class MicroFPGA:
                 # instantiate camera
                 if use_camera:
                     self._camera = signals.Camera(self._serial)
-                    self._trigger_mode = signals.TriggerMode(self._serial)
-                    self._trigger_mode.set_active_trigger()
+                    self._sync_mode = signals.SyncMode(self._serial)
+                    self._sync_mode.set_active_sync()
                 else:
                     self._camera = None
-                    self._trigger_mode = None
-                    signals.TriggerMode(self._serial).set_passive_trigger()
+                    self._sync_mode = None
+                    signals.SyncMode(self._serial).set_passive_sync()
 
             else:
                 self.disconnect()
@@ -181,114 +182,107 @@ class MicroFPGA:
         else:
             return [-1, -1, -1]
 
-    def set_camera_trigger_mode(self, trigger_mode):
-        if self._trigger_mode is None:
+    def set_camera_sync_mode(self, sync_mode):
+        if self._sync_mode is None:
             return False
         else:
-            return self._trigger_mode.set_state(trigger_mode)
+            return self._sync_mode.set_state(sync_mode)
 
-    def get_trigger_mode(self):
-        if self._trigger_mode is None:
+    def get_sync_mode(self):
+        if self._sync_mode is None:
             return False
         else:
-            return self._trigger_mode.get_state()
+            return self._sync_mode.get_state()
 
-    def is_active_trigger(self):
-        return self.get_trigger_mode() == True
+    def is_active_sync(self):
+        return self.get_sync_mode() == True
 
     def set_camera_pulse(self, value):
-        if self.get_trigger_mode():
+        if self.get_sync_mode():
             self._camera.set_pulse(value)
 
     def get_camera_pulse(self):
-        if self.get_trigger_mode():
+        if self.get_sync_mode():
             return self._camera.get_pulse()
         else:
             return -1
 
-    def set_camera_period(self, value):
-        if self.get_trigger_mode():
-            self._camera.set_period(value)
+    def set_camera_readout(self, value):
+        if self.get_sync_mode():
+            self._camera.set_readout(value)
 
-    def get_camera_period(self):
-        if self.get_trigger_mode():
-            return self._camera.get_period()
+    def get_camera_readout(self):
+        if self.get_sync_mode():
+            return self._camera.get_readout()
         else:
             return -1
 
     def set_camera_exposure(self, value):
-        if self.get_trigger_mode():
+        if self.get_sync_mode():
             self._camera.set_exposure(value)
 
     def get_camera_exposure(self):
-        if self.get_trigger_mode():
+        if self.get_sync_mode():
             return self._camera.get_exposure()
         else:
             return -1
 
     def set_laser_delay(self, value):
-        if self.get_trigger_mode():
+        if self.get_sync_mode():
             self._camera.set_delay(value)
 
     def get_laser_delay(self):
-        if self.get_trigger_mode():
+        if self.get_sync_mode():
             return self._camera.get_delay()
         else:
             return -1
 
-    def set_camera_state(self, pulse: int, period: int, exposure: int, delay: int):
+    def set_camera_state(self, pulse: int, delay: int, exposure: int, readout: int):
         """
         Set the state of the camera trigger module in arbitrary units. The camera
         trigger module generates a periodic signal consisting of a pulse of length
-        <pulse> (in steps of 100 us), repeating every <period> (in steps of 100 us).
+        <pulse> (in us), repeating every <delay+exposure+readout> (in us).
         The module also generates a laser trigger signal that is then processed by the
-        laser trigger module. The laser trigger signal follows the camera trigger signal,
-        but is delayed by <delay> (in steps of 10 us) and has a pulse length of <exposure>
-        (in steps of 100 us). If <delay>+<exposure> > <period> (in physical units), then
-        <exposure> is shorten by the difference.
+        laser trigger module. The laser trigger signal follows the camera fire signal,
+        but is delayed by <delay> (inus) and has a pulse length of <exposure> (in us).
 
-        :param pulse: pulse length of the camera trigger signal, in steps of 100 us.
-        :param period: period of the camera trigger signal, in steps of 100 us.
-        :param exposure: camera exposure used to generate a "fire" signal to the lasers,
-         in steps of 100 us.
+        :param pulse: fire pulse length of the camera trigger signal in us (maximum = 1.048575 s).
+        :param exposure: camera exposure used to generate a "fire" signal to the lasers
+         in us (maximum = 1.048575 s).
         :param delay: delay between the start of the camera pulse and the start of the
-        exposure, in steps of 10 us.
+        exposure in  us  (maximum = 65.535 ms).
+        :param readout: period in us between the end of the exposure and the next fire pulse
+         (maximum = 65.535 ms).
         """
-        if self.get_trigger_mode():
-            self._camera.set_state(pulse, period, exposure, delay)
+        if self.get_sync_mode():
+            self._camera.set_state(pulse, delay, exposure, readout)
 
     def get_camera_state(self):
         """
-        Return the parameters of the camera trigger module in arbitrary units.
+        Return the parameters of the camera trigger module in us.
         :return: State of the camera trigger module
         """
         return self._camera.get_state()
 
-    def set_camera_state_ms(self, pulse: float, period: float, exposure: float, delay: float):
+    def set_camera_state_ms(self, pulse: float, delay: float, exposure: float, readout: float):
         """
-        Set the state of the camera trigger module in ms. The camera
-        trigger module generates a periodic signal consisting of a pulse of length
-        <pulse>, repeating every <period>.
-        The module also generates a laser trigger signal that is then processed by the
-        laser trigger module. The laser trigger signal follows the camera trigger signal,
-        but is delayed by <delay> and has a pulse length of <exposure>
-        (in steps of 100 us). If <delay>+<exposure> > <period>, then
-        <exposure> is shorten by the difference.
+        Set the state of the camera trigger module in ms.
 
-        :param pulse: pulse length of the camera trigger signal (maximum = 6553,5 ms).
-        :param period: period of the camera trigger signal (maximum = 6553,5 ms).
+        :param pulse: fire pulse length of the camera trigger signal in us (maximum = 1.048575 s).
         :param exposure: camera exposure used to generate a "fire" signal to the lasers
-         (maximum = 6553,5 ms).
+         in us (maximum = 1.048575 s).
         :param delay: delay between the start of the camera pulse and the start of the
-        exposure (maximum = 655,35 ms).
+        exposure in  us  (maximum = 65.535 ms).
+        :param readout: period in us between the end of the exposure and the next fire pulse
+         (maximum = 65.535 ms).
         """
-        if self.get_trigger_mode():
-            pulse_au = int(pulse * 10)
-            period_au = int(period * 10)
-            exposure_au = int(exposure * 10)
-            delay_au = int(delay * 100)
+        if self.get_sync_mode():
+            pulse_ms = int(pulse * 1_000)
+            readout_ms = int(readout * 1_000)
+            exposure_ms = int(exposure * 1_000)
+            delay_ms = int(delay * 1_000)
 
-            self._camera.set_state(pulse_au, period_au, exposure_au, delay_au)
+            self._camera.set_state(pulse_ms, delay_ms, exposure_ms, readout_ms)
 
     def get_camera_state_ms(self):
         """
@@ -296,32 +290,32 @@ class MicroFPGA:
         :return: State of the camera trigger module
         """
         state = self._camera.get_state()
-        state['pulse'] = state['pulse'] / 10.
-        state['period'] = state['period'] / 10.
-        state['exposure'] = state['exposure'] / 10.
-        state['delay'] = state['delay'] / 100.
+        state[CameraModuleStates.PULSE.value] = state[CameraModuleStates.PULSE.value] / 1_000.
+        state[CameraModuleStates.DELAY.value] = state[CameraModuleStates.DELAY.value] / 1_000.
+        state[CameraModuleStates.EXPOSURE.value] = state[CameraModuleStates.EXPOSURE.value] / 1_000.
+        state[CameraModuleStates.READOUT.value] = state[CameraModuleStates.READOUT.value] / 1_000.
 
         return state
 
     def start_camera(self):
-        if self.get_trigger_mode():
+        if self.get_sync_mode():
             self._camera.start()
 
     def stop_camera(self):
-        if self.get_trigger_mode():
+        if self.get_sync_mode():
             self._camera.stop()
 
     def is_camera_running(self):
-        if self.get_trigger_mode():
+        if self.get_sync_mode():
             return self._camera.is_running()
         else:
             return False
 
-    def set_active_trigger(self):
-        self._trigger_mode.set_active_trigger()
+    def set_active_sync(self):
+        self._sync_mode.set_active_sync()
 
-    def set_passive_trigger(self):
-        self._trigger_mode.set_passive_trigger()
+    def set_passive_sync(self):
+        self._sync_mode.set_passive_sync()
 
     def get_id(self):
         if self._id == signals.ID_AU:
