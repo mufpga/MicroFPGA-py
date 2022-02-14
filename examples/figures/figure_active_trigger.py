@@ -30,19 +30,19 @@ with cl.MicroFPGA(n_laser=3, use_camera=True) as mufpga:
                 'channel': 0,
                 'mode': LaserTriggerMode.MODE_FOLLOW,
                 'duration': 1,
-                'sequence': sig.MAX_SEQUENCE
+                'sequence': sig.format_sequence('1010101010101010')
             }
             laser1 = {
                 'channel': 1,
                 'mode': LaserTriggerMode.MODE_RISING,
-                'duration': 6500,
+                'duration': 4000,
                 'sequence': sig.format_sequence('0101010101010101')
             }
             laser2 = {
                 'channel': 2,
                 'mode': LaserTriggerMode.MODE_FALLING,
-                'duration': 1000,
-                'sequence': sig.format_sequence('1010101010101010')
+                'duration': 2000,
+                'sequence': sig.format_sequence('1100110011001100')
             }
             mufpga.set_laser_state(**laser0)
             mufpga.set_laser_state(**laser1)
