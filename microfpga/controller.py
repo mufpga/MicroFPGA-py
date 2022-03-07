@@ -312,10 +312,12 @@ class MicroFPGA:
             return False
 
     def set_active_sync(self):
-        self._sync_mode.set_active_sync()
+        if self._sync_mode is not None:
+            self._sync_mode.set_active_sync()
 
     def set_passive_sync(self):
-        self._sync_mode.set_passive_sync()
+        if self._sync_mode is not None:
+            self._sync_mode.set_passive_sync()
 
     def get_id(self):
         if self._id == signals.ID_AU:
