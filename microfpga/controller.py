@@ -5,8 +5,8 @@ from microfpga.signals import CameraModuleStates
 
 class MicroFPGA:
 
-    def __init__(self, n_laser=0, n_ttl=0, n_servo=0, n_pwm=0, n_ai=0, use_camera=True):
-        self._serial = regint.RegisterInterface()
+    def __init__(self, n_laser=0, n_ttl=0, n_servo=0, n_pwm=0, n_ai=0, use_camera=True, know_device=None):
+        self._serial = regint.RegisterInterface(know_device)
         self.device = self._serial.get_device()
 
         self._lasers = []

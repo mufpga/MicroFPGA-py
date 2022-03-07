@@ -3,15 +3,36 @@ import serial.tools.list_ports
 
 class RegisterInterface:
 
-    def __init__(self):
-        self._device = self.__find_port()
+    def __init__(self, known_device=None):
+        devices = self.__find_port()
 
-        if self._device is not None:
-            self._serial = serial.Serial(self._device, 57600, timeout=1)
-            self._connected = True
+        if devices:
+            if len(devices) == 1:
+                self._device = devices[0]
+                self.__connect()
+            else:
+                if known_device in devices:
+                    self._device = known_device
+                    self.__connect()
+                else:
+                    raise Warning(f'Cannot choose between detected devices {devices} (known_device '
+                                  f'= {known_device}). Choose a device from the list and pass it as '
+                                  f'know_device parameter to the controller. If there is no detected '
+                                  f'device in the list, check the physical device connection.')
+                    self.__not_connected()
         else:
-            self._serial = None
-            self._connected = False
+            raise Warning('No device found.')
+            self.__not_connected()
+
+    def __connect(self):
+        assert self._device is not None
+        self._serial = serial.Serial(self._device, 57600, timeout=1)
+        self._connected = True
+
+    def __not_connected(self):
+        self._device = None
+        self._serial = None
+        self._connected = False
 
     def __find_port(self):
         AU_CU_VID = '0403:6010'
@@ -22,13 +43,16 @@ class RegisterInterface:
         plist = list(serial.tools.list_ports.comports())
 
         # checks vendor and product IDs
+        au_cu_list = []
         for s in plist:
             start = len(s.hwid) - s.hwid[::-1].find(VID_PID) + 1
             end = s.hwid.find(SER)
 
             vid_pid = s.hwid[start:end]
             if vid_pid == AU_CU_VID:
-                return s.device
+                au_cu_list.append(s.device)
+
+        return au_cu_list
 
     def is_connected(self):
         return self._connected
