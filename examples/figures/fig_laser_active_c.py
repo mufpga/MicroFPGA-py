@@ -18,7 +18,7 @@ with cl.MicroFPGA(n_laser=3, use_camera=True) as mufpga:
                 'pulse': 1.5,  # ms
                 'delay': 0.5,
                 'exposure': 10,
-                'readout': 2,
+                'readout': 1,
             }
             mufpga.set_camera_state_ms(**camera)  # set the values in ms
 
