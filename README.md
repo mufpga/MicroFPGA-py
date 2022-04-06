@@ -21,7 +21,7 @@ Documentation and tutorials are available on [https://mufpga.github.io/](https:/
 This repository contains the Python package to control MicroFPGA. To use `microfpga` in you Python environment, you can directly install it from PyPi using the following command:
 
 ```bash
-pip install microfpga
+<not yet> pip install microfpga
 ```
 
 Alternatively, you can install it from the source code in a minimal environment:
@@ -32,7 +32,7 @@ conda activate microfpga
 pip install -e .
 ```
 
-The package contains examples on how to use MicroFPGA.
+This repository also contains [examples](https://github.com/mufpga/MicroFPGA-py/tree/main/examples) on how to use MicroFPGA.
 
 <!---
 
