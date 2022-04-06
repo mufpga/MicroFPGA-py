@@ -34,7 +34,21 @@ with cl.MicroFPGA(n_laser=1, use_camera=True) as mufpga:
                 'duration': 1,
                 'sequence':  sig.MAX_SEQUENCE
             }
+            laser1 = {
+                'channel': 1,
+                'mode': LaserTriggerMode.MODE_RISING,
+                'duration': 6500,
+                'sequence': sig.format_sequence('1010101010101010')
+            }
+            laser2 = {
+                'channel': 2,
+                'mode': LaserTriggerMode.MODE_FALLING,
+                'duration': 1000,
+                'sequence': sig.format_sequence('0101010101010101')
+            }
             mufpga.set_laser_state(**laser0)
+            mufpga.set_laser_state(**laser1)
+            mufpga.set_laser_state(**laser2)
 
             # we also need to start the camera
             mufpga.start_camera()
