@@ -17,7 +17,7 @@ class RegisterInterface:
                 else:
                     raise Warning(f'Cannot choose between detected devices {devices} (known_device '
                                   f'= {known_device}). Choose a device from the list and pass it as '
-                                  f'know_device parameter to the controller. If there is no detected '
+                                  f'known_device parameter to the controller. If there is no detected '
                                   f'device in the list, check the physical device connection.')
                     self.__not_connected()
         else:
