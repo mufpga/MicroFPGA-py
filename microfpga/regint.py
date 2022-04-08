@@ -1,6 +1,11 @@
 import serial.tools.list_ports
 import warnings
 
+AU_CU_VID = '0403:6010'
+VID_PID = 'VID:PID'[::-1]
+SER = ' SER'
+
+
 def format_write_request(address, data):
     buff = bytearray(9)
 
@@ -36,10 +41,6 @@ def format_to_int(data):
 
 
 def find_port():
-    AU_CU_VID = '0403:6010'
-    VID_PID = 'VID:PID'[::-1]
-    SER = ' SER'
-
     # list ports
     plist = list(serial.tools.list_ports.comports())
 
@@ -59,6 +60,7 @@ def find_port():
 class RegisterInterface:
 
     def __init__(self, known_device=None):
+        self._connected = False
         devices = find_port()
 
         if devices:
@@ -94,6 +96,7 @@ class RegisterInterface:
 
     def disconnect(self):
         self._serial.close()
+        self._connected = False
 
     def get_device(self):
         return self._device

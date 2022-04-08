@@ -29,11 +29,12 @@ with cl.MicroFPGA() as mufpga:
 print('Disconnected')
 
 
-# Alternatively, you can connect and disconnect yourself:
-mufpga = cl.MicroFPGA()
+# # Alternatively, you can connect and disconnect yourself:
+# mufpga = cl.MicroFPGA()
 
-if mufpga.is_connected():
-    print(f'Connected to {mufpga.get_id()}')
+# if mufpga.is_connected():
+#    print(f'Connected to {mufpga.get_id()}')
 
-# It is important to free the port by disconnecting
-mufpga.disconnect()
+# # It is important to free the port by disconnecting
+# mufpga.disconnect()
+# print(f'Still connected? {mufpga.is_connected()}')
