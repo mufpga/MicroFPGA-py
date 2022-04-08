@@ -1,6 +1,7 @@
 from microfpga import signals
 from microfpga import regint
 from microfpga.signals import ActiveParameters
+import warnings
 
 
 class MicroFPGA:
@@ -55,11 +56,11 @@ class MicroFPGA:
                 self.disconnect()
 
                 if self._version != signals.CURR_VER:
-                    raise Warning('Wrong version: expected ' + str(signals.CURR_VER) + \
+                    warnings.warn('Wrong version: expected ' + str(signals.CURR_VER) + \
                                   ', got ' + str(self._version) + '. The port has been disconnected')
 
                 if not (self._id in signals.get_compatible_ids()):
-                    raise Warning(f'Wrong board id: expected {signals.ID_MOJO} (Mojo),'
+                    warnings.warn(f'Wrong board id: expected {signals.ID_MOJO} (Mojo),'
                                   f' {signals.ID_CU} (Cu), {signals.ID_AU} (Au) or'
                                   f' {signals.ID_AUP} (Au+),'
                                   f' got {self._id}. The port has been disconnected')

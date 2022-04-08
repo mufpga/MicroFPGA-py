@@ -1,5 +1,5 @@
 import serial.tools.list_ports
-
+import warnings
 
 def format_write_request(address, data):
     buff = bytearray(9)
@@ -71,13 +71,13 @@ class RegisterInterface:
                     self.__connect()
                 else:
                     self.__not_connected()
-                    raise Warning(f'Cannot choose between detected devices {devices} (known_device '
+                    warnings.warn(f'Cannot choose between detected devices {devices} (known_device '
                                   f'= {known_device}). Choose a device from the list and pass it as '
                                   f'known_device parameter to the controller. If there is no detected '
                                   f'device in the list, check the physical device connection.')
         else:
             self.__not_connected()
-            raise Warning('No device found.')
+            warnings.warn('No device found.')
 
     def __connect(self):
         assert self._device is not None

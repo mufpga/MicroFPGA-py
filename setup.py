@@ -9,6 +9,7 @@ setup(name='microfpga',
       packages=['microfpga'],
       install_requires=[
           'pyserial',
-          'serial'
+          'serial',
+          'pytest'
       ],
       zip_safe=False)
