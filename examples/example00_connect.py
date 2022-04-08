@@ -12,7 +12,7 @@ import microfpga.controller as cl
 #       '/dev/cu.usbserial-FT3KRFFN1').
 #   3) Replace the 'with' statement with the following:
 #
-#       with cl.MicroFPGA(know_device=XXX) as mufpga:
+#       with cl.MicroFPGA(known_device=XXX) as mufpga:
 #
 #               where XXX is the port name
 with cl.MicroFPGA() as mufpga:
