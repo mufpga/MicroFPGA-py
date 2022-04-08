@@ -3,8 +3,6 @@
 """
 
 import microfpga.controller as cl
-import microfpga.signals as sig
-from microfpga.signals import LaserTriggerMode
 
 with cl.MicroFPGA(n_ttl=2,
                   n_servo=2,
@@ -38,7 +36,7 @@ with cl.MicroFPGA(n_ttl=2,
         mufpga.set_pwm_state(pwm_id, pwm_state)
         print(f'Current PWM {pwm_id} state: {mufpga.get_pwm_state(pwm_id)}')
 
-        # Finally servo signals are used to control servomotors and their value
+        # Finally, servo signals are used to control servomotors and their value
         # is between 0 and 65535
         servo_id = 1  # let's use the second channel
         servo_state = mufpga.get_servo_state(servo_id)

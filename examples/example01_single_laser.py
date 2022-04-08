@@ -10,7 +10,7 @@ import microfpga.controller as cl
 import microfpga.signals as sig
 from microfpga.signals import LaserTriggerMode
 
-# By default use_camera = True, here we use passive triggering
+# By default use_camera = True, here we use passive synchronization
 with cl.MicroFPGA(n_laser=1, use_camera=False) as mufpga:
 
     # check if successful

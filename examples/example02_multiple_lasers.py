@@ -10,7 +10,7 @@ import microfpga.controller as cl
 import microfpga.signals as sig
 from microfpga.signals import LaserTriggerMode
 
-# By default use_camera = True, here we use passive triggering
+# By default use_camera = True, here we use passive synchronization
 with cl.MicroFPGA(n_laser=3, use_camera=False) as mufpga:
 
     # check if successful
@@ -56,7 +56,6 @@ with cl.MicroFPGA(n_laser=3, use_camera=False) as mufpga:
         assert [laser2['mode'].value,
                 laser2['duration'],
                 laser2['sequence']] == mufpga.get_laser_state(laser2['channel'])
-
 
     else:
         print('Failed to connect')
