@@ -5,4 +5,5 @@ dependencies:
   - pip
   - pip:
     - pyserial
-    - serial 
+    - serial
+    - pytest

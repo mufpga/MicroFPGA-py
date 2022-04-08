@@ -1,6 +1,6 @@
 from microfpga import signals
 from microfpga import regint
-from microfpga.signals import CameraModuleStates
+from microfpga.signals import ActiveParameters
 
 
 class MicroFPGA:
@@ -290,10 +290,10 @@ class MicroFPGA:
         :return: State of the camera trigger module
         """
         state = self._camera.get_state()
-        state[CameraModuleStates.PULSE.value] = state[CameraModuleStates.PULSE.value] / 1_000.
-        state[CameraModuleStates.DELAY.value] = state[CameraModuleStates.DELAY.value] / 1_000.
-        state[CameraModuleStates.EXPOSURE.value] = state[CameraModuleStates.EXPOSURE.value] / 1_000.
-        state[CameraModuleStates.READOUT.value] = state[CameraModuleStates.READOUT.value] / 1_000.
+        state[ActiveParameters.PULSE.value] = state[ActiveParameters.PULSE.value] / 1_000.
+        state[ActiveParameters.DELAY.value] = state[ActiveParameters.DELAY.value] / 1_000.
+        state[ActiveParameters.EXPOSURE.value] = state[ActiveParameters.EXPOSURE.value] / 1_000.
+        state[ActiveParameters.READOUT.value] = state[ActiveParameters.READOUT.value] / 1_000.
 
         return state
 
