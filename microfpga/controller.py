@@ -73,7 +73,7 @@ class MicroFPGA:
             self.disconnect()
 
     def disconnect(self):
-        if self._serial:
+        if self.is_connected():
             self._serial.disconnect()
 
     def is_connected(self):
