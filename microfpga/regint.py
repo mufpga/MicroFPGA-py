@@ -10,14 +10,8 @@ def format_write_request(address, data):
     buff = bytearray(9)
 
     buff[0] = 1 << 7
-    buff[1] = address & 0xff
-    buff[2] = (address >> 8) & 0xff
-    buff[3] = (address >> 16) & 0xff
-    buff[4] = (address >> 24) & 0xff
-    buff[5] = data & 0xff
-    buff[6] = (data >> 8) & 0xff
-    buff[7] = (data >> 16) & 0xff
-    buff[8] = (data >> 24) & 0xff
+    buff[1:] = int.to_bytes(address, length=4, byteorder='little')
+    buff[5:] = int.to_bytes(data, length=4, byteorder='little')
 
     return buff
 
@@ -25,18 +19,18 @@ def format_write_request(address, data):
 def format_read_request(address):
     buff = bytearray(5)
 
-    buff[0] = 0 << 7
-    buff[1] = address & 0xff
-    buff[2] = (address >> 8) & 0xff
-    buff[3] = (address >> 16) & 0xff
-    buff[4] = (address >> 24) & 0xff
+    buff[0] = 0
+    buff[1:] = int.to_bytes(address, length=4, byteorder='little')
 
     return buff
 
 
 def format_to_int(data):
     assert len(data) == 4, f'Data has the wrong number of bytes (got {len(data)}, expected 4)'
+
+    # regint returns a byte array with little endian encoding
     val = (data[0] & 0xff) | (data[1] & 0xff) << 8 | (data[2] & 0xff) << 16 | (data[3] & 0xff) << 24
+
     return val
 
 
