@@ -1,5 +1,8 @@
 import pytest
-from microfpga.regint import format_read_request, format_write_request, format_to_int
+from microfpga.regint import (
+    format_read_request,
+    format_write_request,
+    format_to_int)
 
 
 @pytest.mark.parametrize('incorrect_data', [b'', b'\x2a\x0d\x07', b'\x2a\x0d\x07\x56\xca'])

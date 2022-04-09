@@ -183,7 +183,10 @@ class Signal(ABC):
         :param value: value to test.
         :return: True if the value is allowed, False otherwise.
         """
-        return 0 <= value <= self.get_max()
+        return 0 <= value <= self.get_max() and self.output
+
+    def is_read_only(self):
+        return not self.output
 
     @abstractmethod
     def get_num_signal(self):

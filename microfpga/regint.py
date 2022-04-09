@@ -34,28 +34,11 @@ def format_to_int(data):
     return val
 
 
-def find_port():
-    # list ports
-    plist = list(serial.tools.list_ports.comports())
-
-    # checks vendor and product IDs
-    au_cu_list = []
-    for s in plist:
-        start = len(s.hwid) - s.hwid[::-1].find(VID_PID) + 1
-        end = s.hwid.find(SER)
-
-        vid_pid = s.hwid[start:end]
-        if vid_pid == AU_CU_VID:
-            au_cu_list.append(s.device)
-
-    return au_cu_list
-
-
 class RegisterInterface:
 
     def __init__(self, known_device=None):
         self._connected = False
-        devices = find_port()
+        devices = self.__find_port()
 
         if devices:
             if len(devices) == 1:
@@ -105,3 +88,19 @@ class RegisterInterface:
         if self._connected:
             self._serial.write(format_read_request(address))
             return format_to_int(self._serial.read(4))
+
+    def __find_port(self):
+        # list ports
+        plist = list(serial.tools.list_ports.comports())
+
+        # checks vendor and product IDs
+        au_cu_list = []
+        for s in plist:
+            start = len(s.hwid) - s.hwid[::-1].find(VID_PID) + 1
+            end = s.hwid.find(SER)
+
+            vid_pid = s.hwid[start:end]
+            if vid_pid == AU_CU_VID:
+                au_cu_list.append(s.device)
+
+        return au_cu_list
