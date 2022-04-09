@@ -56,7 +56,7 @@ class MicroFPGA:
                 self.disconnect()
 
                 if self._version != signals.CURR_VER:
-                    warnings.warn('Wrong version: expected ' + str(signals.CURR_VER) + \
+                    warnings.warn('Wrong version: expected ' + str(signals.CURR_VER) +
                                   ', got ' + str(self._version) + '. The port has been disconnected')
 
                 if not (self._id in signals.get_compatible_ids()):
