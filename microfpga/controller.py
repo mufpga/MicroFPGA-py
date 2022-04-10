@@ -5,8 +5,16 @@ import warnings
 
 
 class MicroFPGA:
-
-    def __init__(self, n_laser=0, n_ttl=0, n_servo=0, n_pwm=0, n_ai=0, use_camera=True, known_device=None):
+    def __init__(
+        self,
+        n_laser=0,
+        n_ttl=0,
+        n_servo=0,
+        n_pwm=0,
+        n_ai=0,
+        use_camera=True,
+        known_device=None,
+    ):
         self._serial = regint.RegisterInterface(known_device)
         self.device = self._serial.get_device()
 
@@ -19,8 +27,9 @@ class MicroFPGA:
             self._version = self._serial.read(signals.ADDR_VER)
             self._id = self._serial.read(signals.ADDR_ID)
 
-            if (self._version == signals.CURR_VER) and \
-                    self._id in signals.get_compatible_ids():
+            if (
+                self._version == signals.CURR_VER
+            ) and self._id in signals.get_compatible_ids():
                 # instantiate lasers
                 for i in range(n_laser):
                     self._lasers.append(signals.LaserTrigger(i, self._serial))
@@ -56,14 +65,19 @@ class MicroFPGA:
                 self.disconnect()
 
                 if self._version != signals.CURR_VER:
-                    warnings.warn('Wrong version: expected ' + str(signals.CURR_VER) +
-                                  ', got ' + str(self._version) + '. The port has been disconnected')
+                    warnings.warn(
+                        f"Wrong version: expected {str(signals.CURR_VER)}, "
+                        f"got {str(self._version)}. The port has been "
+                        f"disconnected"
+                    )
 
                 if not (self._id in signals.get_compatible_ids()):
-                    warnings.warn(f'Wrong board id: expected {signals.ID_MOJO} (Mojo),'
-                                  f' {signals.ID_CU} (Cu), {signals.ID_AU} (Au) or'
-                                  f' {signals.ID_AUP} (Au+),'
-                                  f' got {self._id}. The port has been disconnected')
+                    warnings.warn(
+                        f"Wrong board id: expected {signals.ID_MOJO} (Mojo),"
+                        f" {signals.ID_CU} (Cu), {signals.ID_AU} (Au) or"
+                        f" {signals.ID_AUP} (Au+),"
+                        f" got {self._id}. The port has been disconnected"
+                    )
 
     def __enter__(self):
         return self
@@ -198,7 +212,7 @@ class MicroFPGA:
             return self._sync_mode.get_state()
 
     def is_active_sync(self):
-        return self.get_sync_mode() == True
+        return self.get_sync_mode()
 
     def set_camera_pulse(self, value):
         if self.get_sync_mode():
@@ -240,22 +254,30 @@ class MicroFPGA:
         else:
             return -1
 
-    def set_camera_state(self, pulse: int, delay: int, exposure: int, readout: int):
+    def set_camera_state(
+            self,
+            pulse: int,
+            delay: int,
+            exposure: int,
+            readout: int
+    ):
         """
-        Set the state of the camera trigger module in arbitrary units. The camera
-        trigger module generates a periodic signal consisting of a pulse of length
-        <pulse> (in us), repeating every <delay+exposure+readout> (in us).
-        The module also generates a laser trigger signal that is then processed by the
-        laser trigger module. The laser trigger signal follows the camera fire signal,
-        but is delayed by <delay> (inus) and has a pulse length of <exposure> (in us).
+        Set the state of the camera trigger module in arbitrary units. The
+        camera trigger module generates a periodic signal consisting of a
+        pulse of length <pulse> (in us), repeating every <delay + exposure +
+        readout> (in us). The module also generates a laser trigger signal
+        that is then processed by the laser trigger module. The laser trigger
+        signal follows the camera fire signal, but is delayed by <delay> (in
+        us) and has a pulse length of <exposure> (in us).
 
-        :param pulse: fire pulse length of the camera trigger signal in us (maximum = 1.048575 s).
-        :param exposure: camera exposure used to generate a "fire" signal to the lasers
-         in us (maximum = 1.048575 s).
-        :param delay: delay between the start of the camera pulse and the start of the
-        exposure in  us  (maximum = 65.535 ms).
-        :param readout: period in us between the end of the exposure and the next fire pulse
-         (maximum = 65.535 ms).
+        :param pulse: fire pulse length of the camera trigger signal in us
+            (maximum = 1.048575 s).
+        :param exposure: camera exposure used to generate a "fire" signal to
+            the lasers in us (maximum = 1.048575 s).
+        :param delay: delay between the start of the camera pulse and the
+            start of the exposure in us (maximum = 65.535 ms).
+        :param readout: period in us between the end of the exposure and the
+            next fire pulse (maximum = 65.535 ms).
         """
         if self.get_sync_mode():
             self._camera.set_state(pulse, delay, exposure, readout)
@@ -267,17 +289,20 @@ class MicroFPGA:
         """
         return self._camera.get_state()
 
-    def set_camera_state_ms(self, pulse: float, delay: float, exposure: float, readout: float):
+    def set_camera_state_ms(
+        self, pulse: float, delay: float, exposure: float, readout: float
+    ):
         """
         Set the state of the camera trigger module in ms.
 
-        :param pulse: fire pulse length of the camera trigger signal in us (maximum = 1.048575 s).
-        :param exposure: camera exposure used to generate a "fire" signal to the lasers
-         in us (maximum = 1.048575 s).
-        :param delay: delay between the start of the camera pulse and the start of the
-        exposure in  us  (maximum = 65.535 ms).
-        :param readout: period in us between the end of the exposure and the next fire pulse
-         (maximum = 65.535 ms).
+        :param pulse: fire pulse length of the camera trigger signal in us
+            (maximum = 1.048575 s).
+        :param exposure: camera exposure used to generate a "fire" signal to
+            the lasers in us (maximum = 1.048575 s).
+        :param delay: delay between the start of the camera pulse and the
+            start of the exposure in us (maximum = 65.535 ms).
+        :param readout: period in us between the end of the exposure and the
+            next fire pulse (maximum = 65.535 ms).
         """
         if self.get_sync_mode():
             pulse_ms = int(pulse * 1_000)
@@ -285,7 +310,12 @@ class MicroFPGA:
             exposure_ms = int(exposure * 1_000)
             delay_ms = int(delay * 1_000)
 
-            self._camera.set_state(pulse_ms, delay_ms, exposure_ms, readout_ms)
+            self._camera.set_state(
+                pulse_ms,
+                delay_ms,
+                exposure_ms,
+                readout_ms
+            )
 
     def get_camera_state_ms(self):
         """
@@ -293,10 +323,18 @@ class MicroFPGA:
         :return: State of the camera trigger module
         """
         state = self._camera.get_state()
-        state[ActiveParameters.PULSE.value] = state[ActiveParameters.PULSE.value] / 1_000.
-        state[ActiveParameters.DELAY.value] = state[ActiveParameters.DELAY.value] / 1_000.
-        state[ActiveParameters.EXPOSURE.value] = state[ActiveParameters.EXPOSURE.value] / 1_000.
-        state[ActiveParameters.READOUT.value] = state[ActiveParameters.READOUT.value] / 1_000.
+        state[ActiveParameters.PULSE.value] = (
+            state[ActiveParameters.PULSE.value] / 1_000.0
+        )
+        state[ActiveParameters.DELAY.value] = (
+            state[ActiveParameters.DELAY.value] / 1_000.0
+        )
+        state[ActiveParameters.EXPOSURE.value] = (
+            state[ActiveParameters.EXPOSURE.value] / 1_000.0
+        )
+        state[ActiveParameters.READOUT.value] = (
+            state[ActiveParameters.READOUT.value] / 1_000.0
+        )
 
         return state
 
@@ -324,12 +362,12 @@ class MicroFPGA:
 
     def get_id(self):
         if self._id == signals.ID_AU:
-            return 'Au'
+            return "Au"
         elif self._id == signals.ID_AUP:
-            return 'Au+'
+            return "Au+"
         elif self._id == signals.ID_CU:
-            return 'Cu'
+            return "Cu"
         elif self._id == signals.ID_MOJO:
-            return 'Mojo'
+            return "Mojo"
         else:
-            return 'Unknown'
+            return "Unknown"

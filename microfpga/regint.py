@@ -1,17 +1,17 @@
 import serial.tools.list_ports
 import warnings
 
-AU_CU_VID = '0403:6010'
-VID_PID = 'VID:PID'[::-1]
-SER = ' SER'
+AU_CU_VID = "0403:6010"
+VID_PID = "VID:PID"[::-1]
+SER = " SER"
 
 
 def format_write_request(address, data):
     buff = bytearray(9)
 
     buff[0] = 1 << 7
-    buff[1:] = int.to_bytes(address, length=4, byteorder='little')
-    buff[5:] = int.to_bytes(data, length=4, byteorder='little')
+    buff[1:] = int.to_bytes(address, length=4, byteorder="little")
+    buff[5:] = int.to_bytes(data, length=4, byteorder="little")
 
     return buff
 
@@ -20,22 +20,28 @@ def format_read_request(address):
     buff = bytearray(5)
 
     buff[0] = 0
-    buff[1:] = int.to_bytes(address, length=4, byteorder='little')
+    buff[1:] = int.to_bytes(address, length=4, byteorder="little")
 
     return buff
 
 
 def format_to_int(data):
-    assert len(data) == 4, f'Data has the wrong number of bytes (got {len(data)}, expected 4)'
+    assert (
+        len(data) == 4
+    ), f"Data has the wrong number of bytes (got {len(data)}, expected 4)"
 
     # regint returns a byte array with little endian encoding
-    val = (data[0] & 0xff) | (data[1] & 0xff) << 8 | (data[2] & 0xff) << 16 | (data[3] & 0xff) << 24
+    val = (
+        (data[0] & 0xFF) |
+        (data[1] & 0xFF) << 8 |
+        (data[2] & 0xFF) << 16 |
+        (data[3] & 0xFF) << 24
+    )
 
     return val
 
 
 class RegisterInterface:
-
     def __init__(self, known_device=None):
         self._connected = False
         devices = self.__find_port()
@@ -50,13 +56,16 @@ class RegisterInterface:
                     self.__connect()
                 else:
                     self.__not_connected()
-                    warnings.warn(f'Cannot choose between detected devices {devices} (known_device '
-                                  f'= {known_device}). Choose a device from the list and pass it as '
-                                  f'known_device parameter to the controller. If there is no detected '
-                                  f'device in the list, check the physical device connection.')
+                    warnings.warn(
+                        f"Cannot choose between detected devices {devices} "
+                        f"(known_device={known_device}). Choose a device from"
+                        f" the list and pass it as known_device parameter to "
+                        f"the controller. If there is no detected device in "
+                        f"the list, check the physical device connection."
+                    )
         else:
             self.__not_connected()
-            warnings.warn('No device found.')
+            warnings.warn("No device found.")
 
     def __connect(self):
         assert self._device is not None
