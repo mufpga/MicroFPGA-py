@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "microfpga"
+version = "3.1.0"
+description = "MicroFPGA is an FPGA-based platform for the electronic control of microscopes. It aims at using affordable FPGA to generate or read signals from a variety of devices, including cameras, lasers, servomotors, filter-wheels, etc. This package allows controlling MicroFPGA with Python."
+authors = ["jdeschamps <6367888+jdeschamps@users.noreply.github.com>"]
+license = "GPL-3.0"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+pyserial = "^3.5"
+serial = "^0.0.97"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.1"
+tox = "^3.24.5"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
