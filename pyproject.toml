@@ -7,7 +7,6 @@ license = "GPL-3.0"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-pyserial = "^3.5"
 serial = "^0.0.97"
 
 [tool.poetry.dev-dependencies]

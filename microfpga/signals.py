@@ -1,8 +1,9 @@
-""" Module defining the different signals (I/O) classes of MicroFPGA.
+""" Module defining the different signals (I/O or parameters) classes of
+MicroFPGA.
 """
 from abc import ABC, abstractmethod
-from microfpga import regint
 from enum import Enum
+from microfpga import regint
 
 # constants, defined similarly in the FPGA configuration source
 NUM_LASERS = 8
@@ -111,15 +112,15 @@ def format_sequence(sequence):
     :return: int value of the binary sequence, or -1 if the sequence is not 16
             characters long or contains characters others than 0 or 1.
     """
-    b = True
-    for ch in sequence:
-        if ch != "0" and ch != "1":
-            b = False
+    is_binary = True
+    for frame in sequence:
+        if frame not in ('0', '1'):
+            is_binary = False
 
-    if b and len(sequence) == 16:
+    if is_binary and len(sequence) == 16:
         return int(sequence, 2)
-    else:
-        return -1
+
+    return -1
 
 
 def get_compatible_ids():
@@ -142,11 +143,11 @@ def get_analog_ids():
 
 
 class Signal(ABC):
-    """Base class for all MicroFPGA inputs/outputs.
+    """Base class for all MicroFPGA inputs/outputs and parameters.
 
-    A signal corresponds to an input or an output of the FPGA. A signal has a
-    state which is represented by an int in the range [0, max]. Signals can be
-    read-only.
+    A signal corresponds to an input or an output of the FPGA, or to a
+    parameter of the inputs/outputs. A signal has a state which is
+    represented by an int in the range [0, max]. Signals can be read-only.
 
     Each signal class has a maximum number of channels of possible instances,
     each indexed by a channel id.
@@ -165,7 +166,7 @@ class Signal(ABC):
         serial_com: regint.RegisterInterface,
         output: bool = True
     ):
-        if channel_id < self.get_num_signal():
+        if 0 <= channel_id < self.get_num_signal():
             self.channel_id = channel_id
             self.output = output
             self._serial_com = serial_com
@@ -184,7 +185,6 @@ class Signal(ABC):
 
         :return: address.
         """
-        pass
 
     @abstractmethod
     def get_max(self):
@@ -194,7 +194,6 @@ class Signal(ABC):
 
         :return: maximum value.
         """
-        pass
 
     def is_allowed(self, value: int):
         """Check if the value is a valid signal value.
@@ -208,12 +207,15 @@ class Signal(ABC):
         return 0 <= value <= self.get_max() and self.output
 
     def is_read_only(self):
+        """ Check if the signal is read-only.
+
+        :return: True if it is, False otherwise.
+        """
         return not self.output
 
     @abstractmethod
     def get_num_signal(self):
         """Return the maximum number of channels for the signal type."""
-        pass
 
     @abstractmethod
     def get_name(self):
@@ -221,7 +223,6 @@ class Signal(ABC):
 
         :return: signal name.
         """
-        pass
 
     def set_state(self, value: int):
         """Set the signal state.
@@ -232,22 +233,23 @@ class Signal(ABC):
         :return: True if the request was sent, False if the device is not
             connected.
         """
-        if self.output and self.is_allowed(value):
-            return self._serial_com.write(
-                self.get_address() + self.channel_id,
-                value
+        if not self.output:
+            raise ValueError(
+                f"{self.get_name()} (channel {self.channel_id}) is "
+                f"read-only."
             )
-        else:
+
+        if not self.is_allowed(value):
             if self.output:
                 raise ValueError(
                     f"Value {value} not allowed in {self.get_name()} "
                     f"(channel {self.channel_id})."
                 )
-            else:
-                raise ValueError(
-                    f"{self.get_name()} (channel {self.channel_id}) is "
-                    f"read-only."
-                )
+
+        return self._serial_com.write(
+            self.get_address() + self.channel_id,
+            value
+        )
 
     def get_state(self):
         """Read the state of the signal.
@@ -384,14 +386,12 @@ class _Mode(Signal):
         """
         if isinstance(value, LaserTriggerMode):
             return Signal.is_allowed(self, value.value)
-        else:
-            return Signal.is_allowed(self, value)
+        return Signal.is_allowed(self, value)
 
     def set_state(self, value):
         if isinstance(value, LaserTriggerMode):
             return Signal.set_state(self, value.value)
-        else:
-            return Signal.set_state(self, value)
+        return Signal.set_state(self, value)
 
     def get_name(self):
         return "Laser mode"
@@ -448,6 +448,16 @@ class _Sequence(Signal):
 
 
 class LaserTrigger:
+    """ Class allowing to modify all parameters of the laser triggering.
+
+    The parameters are the following:
+        - mode: triggering mode, a discrete value between 0 and 4, where
+            0=off, 1=on, 2=rising, 3=falling and 4=follow.
+        - duration: pulse length of the trigger in rising and falling modes.
+        - sequence: 16 bit-long sequence representing a pattern of frame on
+            which to trigger the laser, where the laser is only triggered on
+            1 and the trigger is skipped on 0.
+    """
     def __init__(self, channel_id: int, serial_com: regint.RegisterInterface):
         self.channel_id = channel_id
 
@@ -456,45 +466,92 @@ class LaserTrigger:
         self.seq = _Sequence(channel_id, serial_com)
 
     def set_mode(self, value):
+        """ Set the mode parameter value.
+
+        :param value: new value of the mode parameter.
+        :return: True if the request was sent, False if the device is not
+            connected.
+        """
         return self.mode.set_state(value)
 
     def get_mode(self):
+        """ Return the current mode parameter value.
+
+        :return: mode parameter value.
+        """
         return self.mode.get_state()
 
     def set_duration(self, value):
+        """ Set the duration parameter value.
+
+        :param value: new value of the duration parameter.
+        :return: True if the request was sent, False if the device is not
+            connected.
+        """
         return self.duration.set_state(value)
 
     def get_duration(self):
+        """ Return the current duration parameter value.
+
+        :return: duration parameter value.
+        """
         return self.duration.get_state()
 
     def set_sequence(self, value):
+        """ Set the sequence parameter value.
+
+        :param value: new value of the sequence parameter.
+        :return: True if the request was sent, False if the device is not
+            connected.
+        """
         return self.seq.set_state(value)
 
     def get_sequence(self):
+        """ Return the current sequence parameter value.
+
+        :return: sequence parameter value.
+        """
         return self.seq.get_state()
 
     def set_state(self, mode, duration, sequence):
-        b = self.set_mode(mode)
-        if not b:
-            print(f"Laser {self.channel_id}: could not set Mode {b}.")
-            return b
+        """ Set the complete state of the laser trigger.
 
-        b = self.set_duration(duration)
-        if not b:
+        :param mode: laser trigger mode.
+        :param duration: pulse duration in pulsing trigger modes.
+        :param sequence: pattern sequence of the trigger.
+        :return: True if all request were sent, False if the FPGA is not
+            connected.
+        """
+        is_sent = self.set_mode(mode)
+        if not is_sent:
+            print(f"Laser {self.channel_id}: could not set Mode {is_sent}.")
+            return is_sent
+
+        is_sent = self.set_duration(duration)
+        if not is_sent:
             print(f"Laser {self.channel_id}: could not set Duration.")
-            return b
+            return is_sent
 
-        b = self.set_sequence(sequence)
-        if not b:
+        is_sent = self.set_sequence(sequence)
+        if not is_sent:
             print(f"Laser {self.channel_id}: could not set Sequence.")
 
-        return b
+        return is_sent
 
     def get_state(self):
+        """ Return a list of the laser trigger parameters value.
+
+        :return: list of parameters value.
+        """
         return [self.get_mode(), self.get_duration(), self.get_sequence()]
 
 
 class _CameraPulse(Signal):
+    """ Parameter signal representing the pulse length (us) of the fire
+    signal.
+
+    Pulse only has effect in active synchronization mode.
+    """
     def __init__(self, serial_com: regint.RegisterInterface):
         Signal.__init__(self, 0, serial_com)
 
@@ -512,6 +569,11 @@ class _CameraPulse(Signal):
 
 
 class _CameraReadout(Signal):
+    """ Parameter signal representing the delay (us) between the end of the
+    exposure signal pulse and the beginning of the next fire signal pulse.
+
+    Read-out only has effect in active synchronization mode.
+    """
     def __init__(self, serial_com: regint.RegisterInterface):
         Signal.__init__(self, 0, serial_com)
 
@@ -529,6 +591,11 @@ class _CameraReadout(Signal):
 
 
 class _CameraExposure(Signal):
+    """ Parameter signal representing the pulse length (us) of the internal
+    exposure signal.
+
+    Exposure only has effect in active synchronization mode.
+    """
     def __init__(self, serial_com: regint.RegisterInterface):
         Signal.__init__(self, 0, serial_com)
 
@@ -546,6 +613,11 @@ class _CameraExposure(Signal):
 
 
 class _LaserDelay(Signal):
+    """ Parameter signal representing the delay (us) between the fire and
+    internal exposure signals.
+
+    Delay only has effect in active synchronization mode.
+    """
     def __init__(self, serial_com: regint.RegisterInterface):
         Signal.__init__(self, 0, serial_com)
 
@@ -563,6 +635,10 @@ class _LaserDelay(Signal):
 
 
 class _CameraStart(Signal):
+    """ Parameter signal starting or stopping the synchronization.
+
+    Start/stop synchronization only has effect in active synchronization mode.
+    """
     def __init__(self, serial_com: regint.RegisterInterface):
         Signal.__init__(self, 0, serial_com)
 
@@ -579,13 +655,35 @@ class _CameraStart(Signal):
         return "Camera start/stop"
 
     def start(self):
+        """ Start generating camera and laser trigger signals.
+
+        This method only has effect in active synchronization mode.
+
+        :return: True if the request was sent, False if the device is not
+            connected.
+        """
         return self.set_state(1)
 
     def stop(self):
+        """ Stop generating camera and laser trigger signals.
+
+        This method only has effect in active synchronization mode.
+
+        :return: True if the request was sent, False if the device is not
+            connected.
+        """
         return self.set_state(0)
 
 
 class SyncMode(Signal):
+    """ Parameter signal determining the FPGA synchronization mode.
+
+    The FPGA has two synchronization mode: active and passive. In active
+    synchronization, the FPGA generates a fire signal intended for a camera
+    and an internal exposure signal used to trigger the lasers. In passive
+    synchronization, the FPGA receives an external exposure signal (generated
+    from a camera) and processes it to trigger the lasers.
+    """
     def __init__(self, serial_com: regint.RegisterInterface):
         Signal.__init__(self, 0, serial_com)
 
@@ -602,13 +700,45 @@ class SyncMode(Signal):
         return "Active/passive synchronisation"
 
     def set_active_sync(self):
+        """ Set the FPGA to active synchronization.
+
+        In active synchronization, the FPGA generates a fire signal intended
+        for a camera and an internal exposure signal used to trigger the
+        lasers.
+
+        :return: True if the request was sent, False if the device is not
+            connected.
+        """
         self.set_state(TriggerSyncMode.ACTIVE.value)
 
     def set_passive_sync(self):
+        """ Set the FPGA to passive synchronization.
+
+        In passive synchronization, the FPGA receives an external exposure
+        signal (generated from a camera) and processes it to trigger the
+        lasers.
+
+        :return: True if the request was sent, False if the device is not
+            connected.
+        """
         self.set_state(TriggerSyncMode.PASSIVE.value)
 
 
 class Camera:
+    """ Camera synchronization class.
+
+    This class allows setting several parameters that impact both camera
+    fire signal (generated by the FPGA) and the internal exposure signal
+    used to trigger the lasers.
+
+    The parameters are the following:
+        - pulse: pulse length (us) of the fire signal pulse.
+        - delay: delay (us) between fire and exposure signal pulses.
+        - exposure: pulse length in us of the exposure signal.
+        - read-out: delay (us) between the end of the exposure signal pulse
+            and the beginning of the fire signal pulse.
+        - start/stop: start/stop generating the signals.
+    """
     def __init__(self, serial_com: regint.RegisterInterface):
         self._pulse = _CameraPulse(serial_com)
         self._readout = _CameraReadout(serial_com)
@@ -617,36 +747,89 @@ class Camera:
         self._start = _CameraStart(serial_com)
 
     def set_pulse(self, value):
+        """ Set the pulse length (us) of the fire signal pulse.
+
+        :return: True if the request was sent, False if the device is not
+            connected.
+        """
         return self._pulse.set_state(value)
 
     def get_pulse(self):
+        """ Return the pulse length (us) of the fire signal pulse.
+
+        :return: read-out (us)
+        """
         return self._pulse.get_state()
 
     def set_readout(self, value):
+        """ Set the delay (us) between the end of the exposure signal pulse
+        and the beginning of the fire signal pulse.
+
+        :return: True if the request was sent, False if the device is not
+            connected.
+        """
         return self._readout.set_state(value)
 
     def get_readout(self):
+        """ Return the delay (us) between the end of the exposure signal pulse
+        and the beginning of the fire signal pulse.
+
+        :return: read-out (us)
+        """
         return self._readout.get_state()
 
     def set_exposure(self, value):
+        """ Set the pulse length in us of the exposure signal.
+
+        :return: True if the request was sent, False if the device is not
+            connected.
+        """
         return self._exposure.set_state(value)
 
     def get_exposure(self):
+        """ Return the pulse length in us of the exposure signal.
+
+        :return: exposure (us)
+        """
         return self._exposure.get_state()
 
     def set_delay(self, value):
+        """ Set the delay (us) between fire signal and exposure signal pulses.
+
+        :return: True if the request was sent, False if the device is not
+            connected.
+        """
         return self._delay.set_state(value)
 
     def get_delay(self):
+        """ Return the delay (us) between fire and exposure signal pulses.
+
+        :return: delay (us)
+        """
         return self._delay.get_state()
 
     def set_state(self, pulse, delay, exposure, readout):
+        """ Set the camera synchronization parameters.
+
+        :param pulse: pulse length (us) of the fire signal.
+        :param delay: delay (us) between fire and exposure signal pulses.
+        :param exposure: pulse length (us) of the exposure signal.
+        :param readout: delay (us) between end of the exposure signal pulse
+            and beginning of the fire signal pulse.
+        :return:
+        """
         self.set_pulse(pulse)
         self.set_delay(delay)
         self.set_exposure(exposure)
         self.set_readout(readout)
 
     def get_state(self):
+        """ Return the camera synchronization parameters.
+
+        The dictionary is indexed by ActiveParameters enum values.
+
+        :return: A dictionary of the parameters.
+        """
         return {
             ActiveParameters.PULSE.value: self.get_pulse(),
             ActiveParameters.DELAY.value: self.get_delay(),
@@ -655,10 +838,27 @@ class Camera:
         }
 
     def start(self):
+        """ Start generating camera fire and laser trigger signals.
+
+        This method only has effect in active synchronization mode.
+
+        :return: True if it started, False otherwise.
+        """
         return self._start.start()
 
     def stop(self):
+        """ Stop generating camera fire and laser trigger signals.
+
+        This method only has effect in active synchronization mode.
+
+        :return: True if it stopped, False otherwise.
+        """
         return self._start.stop()
 
     def is_running(self):
+        """ Check if the FPGA is generating camera fire and laser trigger
+        signals.
+
+        :return: True if it is running, False otherwise.
+        """
         return self._start.get_state()
