@@ -18,21 +18,21 @@ Documentation and tutorials are available on [https://mufpga.github.io/](https:/
 
 ## Content
 
-This repository contains the Python package to control MicroFPGA. To use `microfpga` in you Python environment, you can directly install it from PyPi using the following command:
+This repository contains the Python package to control MicroFPGA. To use `microfpga` in you Python environment, you can install it directly with `pip`:
 
 ```bash
-<not yet> pip install microfpga
+pip install microfpga
 ```
 
-Alternatively, you can install it from the source code in a minimal environment:
+Alternatively, you can install it from the source code:
 
 ``` bash
-conda env create -f environment.yml
-conda activate microfpga
+git clone https://github.com/mufpga/MicroFPGA-py
+cd MicroFPGA-py
 pip install -e .
 ```
 
-This repository also contains [examples](https://github.com/mufpga/MicroFPGA-py/tree/main/examples) on how to use MicroFPGA.
+Finally, configure your Alchitry FPGA with the correct [configuration](https://github.com/mufpga/MicroFPGA) and try some of the [example scripts](https://github.com/mufpga/MicroFPGA-py/tree/main/examples).
 
 <!---
 

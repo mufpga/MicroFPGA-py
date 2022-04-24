@@ -1,9 +1,18 @@
 [tool.poetry]
 name = "microfpga"
-version = "3.1.0"
-description = "MicroFPGA is an FPGA-based platform for the electronic control of microscopes. It aims at using affordable FPGA to generate or read signals from a variety of devices, including cameras, lasers, servomotors, filter-wheels, etc. This package allows controlling MicroFPGA with Python."
+version = "3.1.5"
+description = "FPGA-based platform for the electronic control of microscopes."
 authors = ["Joran Deschamps <joran.deschamps@fht.org>"]
-license = "BSD 3-Clause License"
+readme = "README.md"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Programming Language :: Python",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: BSD License",
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"
