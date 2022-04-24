@@ -2,7 +2,7 @@
 
 </a>
 
-![version](https://img.shields.io/badge/version-3.1.0-blue)[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+![version](https://img.shields.io/badge/version-3.1.0-blue)[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 
 
