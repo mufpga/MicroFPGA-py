@@ -1,8 +1,8 @@
-name: microfpga
+name: mufpga
 
 dependencies:
   - python=3.9
+  - jupyter
   - pip
   - pip:
-    - pyserial
-    - pytest
+    - microfpga
