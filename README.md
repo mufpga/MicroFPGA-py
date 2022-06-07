@@ -42,5 +42,5 @@ Deschamps J, Kieser C, Hoess P, Deguchi T and Ries J,
 
 --->
 
-MicroFPGA-py was written by Joran Deschamps, EMBL (2020).
+MicroFPGA-py was written by Joran Deschamps, EMBL (2020). [PyPi page](https://pypi.org/project/microfpga/)
 
