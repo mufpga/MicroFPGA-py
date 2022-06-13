@@ -34,13 +34,9 @@ pip install -e .
 
 Finally, configure your Alchitry FPGA with the correct [configuration](https://github.com/mufpga/MicroFPGA) and try some of the [example scripts](https://github.com/mufpga/MicroFPGA-py/tree/main/examples).
 
-<!---
 
 ## Cite us
-
-Deschamps J, Kieser C, Hoess P, Deguchi T and Ries J, 
-
---->
+Joran Deschamps, Christian Kieser, Philipp Hoess, Takahiro Deguchi, Jonas Ries, "MicroFPGA: an affordable FPGA platform for microscope control",
+bioRxiv 2022.06.07.495178.
 
 MicroFPGA-py was written by Joran Deschamps, EMBL (2020). [PyPi page](https://pypi.org/project/microfpga/)
-
