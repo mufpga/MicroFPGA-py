@@ -38,7 +38,7 @@ with cl.MicroFPGA(n_laser=1, n_pwm=1) as mufpga:
         camera = {
             'pulse': 2,  # ms
             'delay': 0.5,  # delay of 500 us between camera pulse and start of the exposure
-            'exposure': 20,
+            'exposure': 22.5,
             'readout': 2,
         }
         mufpga.set_camera_state_ms(**camera)  # set the values in ms
@@ -51,7 +51,7 @@ with cl.MicroFPGA(n_laser=1, n_pwm=1) as mufpga:
         laser0 = {
             'channel': 0,
             'mode': LaserTriggerMode.MODE_RISING,
-            'duration': 2000,  # in us
+            'duration': 10_000,  # in us
             'sequence': sig.MAX_SEQUENCE
         }
         mufpga.set_laser_state(**laser0)
@@ -61,11 +61,12 @@ with cl.MicroFPGA(n_laser=1, n_pwm=1) as mufpga:
         mufpga.set_pwm_state(0, pwm_val)
 
         # let's define a sequence of PWM levels (max is 255)
-        pwm_levels = [0, 255 // 4, 255 // 2, 3 * 255 // 4]
+        resolution = 6
+        pwm_levels = [i * 255 // resolution for i in range(resolution+1)]
 
-        # and the "experiment" time
-        counter = 0
-        max_counter = 12
+        # and prepare counters
+        counter, increment = 0, 0
+        max_counter = 4 * (resolution+1) * 4
         frame_time = camera['delay'] + camera['exposure'] + camera['readout']
 
         # we need to start the camera
@@ -74,9 +75,13 @@ with cl.MicroFPGA(n_laser=1, n_pwm=1) as mufpga:
 
         # the pwm level is not synchronized with the camera, only the laser trigger is
         while counter < max_counter:
-            # change pwm level
-            pwm_val = pwm_levels[counter % 4]
-            mufpga.set_pwm_state(0, pwm_val)
+
+            if counter % 4 == 0:
+                # change pwm level
+                pwm_val = pwm_levels[increment % 4]
+                mufpga.set_pwm_state(0, pwm_val)
+
+                increment += 1
 
             # sleep for a frame
             time.sleep(frame_time / 1_000)  # in s
