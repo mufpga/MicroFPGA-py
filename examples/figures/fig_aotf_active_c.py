@@ -23,10 +23,10 @@ with cl.MicroFPGA(n_laser=1, use_camera=True) as mufpga:
 
         if mufpga.is_active_sync():
             camera = {
-                'pulse': 1.5,  # ms
+                'pulse': 15,  # ms
                 'delay': 0,
-                'exposure': 9,
-                'readout': 1
+                'exposure': 25,
+                'readout': 5
             }
             mufpga.set_camera_state_ms(**camera)
 
