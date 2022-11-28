@@ -51,7 +51,7 @@ with cl.MicroFPGA(n_laser=1, n_pwm=1) as mufpga:
         laser0 = {
             'channel': 0,
             'mode': LaserTriggerMode.MODE_RISING,
-            'duration': 10_000,  # in us
+            'duration': 200_000,  # in us
             'sequence': sig.MAX_SEQUENCE
         }
         mufpga.set_laser_state(**laser0)
