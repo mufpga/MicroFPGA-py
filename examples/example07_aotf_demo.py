@@ -61,13 +61,13 @@ with cl.MicroFPGA(n_laser=1, n_pwm=1) as mufpga:
         mufpga.set_pwm_state(0, pwm_val)
 
         # let's define a sequence of PWM levels (max is 255)
-        resolution = 6
+        resolution = 5
         pwm_levels = [i * 255 // resolution for i in range(resolution+1)]
 
         # and prepare counters
         counter, increment = 0, 0
         counter_inc_steps = 4
-        max_counter = counter_inc_steps * (resolution+1) * 2
+        max_counter = counter_inc_steps * len(pwm_levels) * 2
         frame_time = camera['delay'] + camera['exposure'] + camera['readout']
 
         # we need to start the camera
@@ -79,7 +79,7 @@ with cl.MicroFPGA(n_laser=1, n_pwm=1) as mufpga:
 
             if counter % counter_inc_steps == 0:
                 # change pwm level
-                pwm_val = pwm_levels[increment % resolution]
+                pwm_val = pwm_levels[increment % len(pwm_levels)]
                 mufpga.set_pwm_state(0, pwm_val)
 
                 increment += 1
