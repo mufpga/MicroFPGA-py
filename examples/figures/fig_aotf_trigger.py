@@ -15,7 +15,7 @@ import microfpga.signals as sig
 from microfpga.signals import LaserTriggerMode
 
 
-with cl.MicroFPGA(n_laser=1, use_camera=True) as mufpga:
+with cl.MicroFPGA(n_laser=1, n_pwm=1, use_camera=True) as mufpga:
 
     # check if successful
     if mufpga.is_connected():
@@ -32,6 +32,9 @@ with cl.MicroFPGA(n_laser=1, use_camera=True) as mufpga:
             # set PWM state
             pwm_state = 255 // 2
             mufpga.set_pwm_state(0, pwm_state)
+
+            # check the state of the PWM
+            print(mufpga.get_pwm_state(0))
 
             # set laser state
             laser = {
