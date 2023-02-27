@@ -2,7 +2,7 @@
 
 </a>
 
-![version](https://img.shields.io/badge/version-3.1.1-blue)[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)[![tests](https://github.com/mufpga/MicroFPGA-py/actions/workflows/test_and_deploy.yml/badge.svg)](https://github.com/mufpga/MicroFPGA-py/actions/workflows/test_and_deploy.yml)
+![version](https://img.shields.io/badge/version-3.1.2-blue)[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)[![tests](https://github.com/mufpga/MicroFPGA-py/actions/workflows/test_and_deploy.yml/badge.svg)](https://github.com/mufpga/MicroFPGA-py/actions/workflows/test_and_deploy.yml)
 
 
 

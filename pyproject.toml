@@ -1,6 +1,5 @@
 [tool.poetry]
 name = "microfpga"
-version = "3.1.1"
 description = "FPGA-based platform for the electronic control of microscopes."
 authors = ["Joran Deschamps <joran.deschamps@fht.org>"]
 readme = "README.md"
