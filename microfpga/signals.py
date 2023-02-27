@@ -171,7 +171,7 @@ class Signal(ABC):
             self.output = output
             self._serial_com = serial_com
         else:
-            raise Exception(
+            raise ValueError(
                 f"{channel_id} exceeds maximum number of {self.get_name()} "
                 f"signals."
             )

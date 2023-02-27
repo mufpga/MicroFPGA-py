@@ -48,7 +48,7 @@ def test_signal_channel_exception(channel_id):
     :param channel_id: int value in the range [0, 3].
     :return:
     """
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         SignalTest(channel_id=channel_id, max_channels=3)
 
 
